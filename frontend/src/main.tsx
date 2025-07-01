@@ -24,9 +24,9 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
 	createRoot(rootElement).render(
-		<StrictMode>
-			<RouterProvider router={router} />
-		</StrictMode>,
+		// <StrictMode>
+		<RouterProvider router={router} />,
+		// </StrictMode>,
 	);
 } else {
 	console.error('Root container not found');
