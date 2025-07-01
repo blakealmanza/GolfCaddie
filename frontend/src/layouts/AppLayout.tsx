@@ -5,6 +5,7 @@ export default function AppLayout() {
 		<div>
 			<nav>
 				<NavLink to='/'>Home</NavLink>
+				<NavLink to='/round/abc'>Round</NavLink>
 			</nav>
 			<main>
 				<Outlet />

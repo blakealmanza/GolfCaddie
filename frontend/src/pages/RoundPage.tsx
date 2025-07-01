@@ -1,18 +1,7 @@
 import { GeolocateControl, Map as MapLibre } from '@vis.gl/react-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useEffect, useRef } from 'react';
 
 export default function RoundPage() {
-	const geoControlRef = useRef<maplibregl.GeolocateControl>(null);
-	const triggeredRef = useRef(false);
-
-	useEffect(() => {
-		if (geoControlRef.current && !triggeredRef.current) {
-			geoControlRef.current?.trigger();
-			triggeredRef.current = true;
-		}
-	}, []);
-
 	return (
 		<MapLibre
 			initialViewState={{
@@ -31,7 +20,6 @@ export default function RoundPage() {
 			// doubleClickZoom={false}
 		>
 			<GeolocateControl
-				ref={geoControlRef}
 				trackUserLocation={true}
 				fitBoundsOptions={{
 					zoom: 17,
@@ -42,7 +30,12 @@ export default function RoundPage() {
 					timeout: 10000,
 				}}
 				onGeolocate={(e) => {
-					console.log('Located user at', e.coords.latitude, e.coords.longitude);
+					console.log(
+						'Located user at',
+						e.coords.latitude,
+						e.coords.longitude,
+						e.coords.accuracy,
+					);
 				}}
 				onError={(e) => {
 					console.error(e);
