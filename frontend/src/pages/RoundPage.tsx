@@ -26,7 +26,7 @@ export default function RoundPage() {
 	useEffect(() => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
-				const coords = {
+				const coords: LatLng = {
 					lat: pos.coords.latitude,
 					lng: pos.coords.longitude,
 				};
@@ -61,7 +61,7 @@ export default function RoundPage() {
 		}
 	};
 
-	const lineCoords =
+	const lineCoords: LatLng[] =
 		userPosition && target
 			? [
 					{ lat: userPosition.lat, lng: userPosition.lng },
