@@ -11,6 +11,7 @@ const clubSuggestions = [
 
 export function suggestClub(distanceYards: number): string {
 	const suggestion =
-		clubSuggestions.find((c) => distanceYards <= c.max) ?? clubSuggestions[0];
+		clubSuggestions.find((c) => distanceYards <= c.max) ??
+		clubSuggestions[clubSuggestions.length - 1];
 	return suggestion.club;
 }
