@@ -1,14 +1,67 @@
 import { ControlPosition, MapControl, useMap } from '@vis.gl/react-google-maps';
+import { useEffect, useRef, useState } from 'react';
 
 export default function MapControls() {
 	const map = useMap();
+	const [tracking, setTracking] = useState(false);
+	const watchIdRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (!map) return;
+
+		const dragListener = map.addListener('dragstart', () => {
+			if (tracking && watchIdRef.current !== null) {
+				navigator.geolocation.clearWatch(watchIdRef.current);
+				watchIdRef.current = null;
+				setTracking(false);
+			}
+		});
+
+		return () => {
+			dragListener.remove();
+		};
+	}, [map, tracking]);
+
+	const toggleTracking = () => {
+		if (!map) return;
+
+		if (tracking && watchIdRef.current !== null) {
+			navigator.geolocation.clearWatch(watchIdRef.current);
+			watchIdRef.current = null;
+			setTracking(false);
+			return;
+		}
+
+		const id = navigator.geolocation.watchPosition(
+			(pos) => {
+				const coords = {
+					lat: pos.coords.latitude,
+					lng: pos.coords.longitude,
+				};
+				map.panTo(coords);
+				map.setZoom(17);
+			},
+			(err) => {
+				console.error('Geolocation error:', err);
+			},
+			{ enableHighAccuracy: true },
+		);
+		watchIdRef.current = id;
+		setTracking(true);
+	};
 
 	const zoomIn = () => {
-		if (map) map.setZoom((map.getZoom() ?? 0) + 1);
+		if (map) {
+			const zoom = map.getZoom();
+			if (zoom != null) map.setZoom(zoom + 1);
+		}
 	};
 
 	const zoomOut = () => {
-		if (map) map.setZoom((map.getZoom() ?? 0) - 1);
+		if (map) {
+			const zoom = map.getZoom();
+			if (zoom != null) map.setZoom(zoom - 1);
+		}
 	};
 
 	return (
@@ -17,26 +70,21 @@ export default function MapControls() {
 				style={{
 					display: 'flex',
 					flexDirection: 'column',
-					background: 'white',
-					borderRadius: '4px',
-					boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-					overflow: 'hidden',
-					marginBottom: '1rem',
 					marginRight: '1rem',
 				}}
 			>
 				<button type='button' style={{ padding: '8px' }} onClick={zoomIn}>
-					➕
+					+
 				</button>
 				<button type='button' style={{ padding: '8px' }} onClick={zoomOut}>
-					➖
+					-
 				</button>
 				<button
 					type='button'
 					style={{ padding: '8px' }}
-					onClick={() => console.log('tracking')}
+					onClick={toggleTracking}
 				>
-					📍
+					Track
 				</button>
 			</div>
 		</MapControl>
