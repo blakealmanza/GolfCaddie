@@ -20,26 +20,3 @@ export function getDistance(from: LatLng, to: LatLng): number {
 
 	return yards;
 }
-
-// Creates a GeoJSON line from two LatLng points
-export function createGeojsonLine(
-	from: LatLng,
-	to: LatLng,
-): GeoJSON.FeatureCollection<GeoJSON.LineString> {
-	return {
-		type: 'FeatureCollection',
-		features: [
-			{
-				type: 'Feature',
-				geometry: {
-					type: 'LineString',
-					coordinates: [
-						[from.lng, from.lat],
-						[to.lng, to.lat],
-					],
-				},
-				properties: {},
-			},
-		],
-	};
-}
