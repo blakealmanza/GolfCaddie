@@ -1,7 +1,7 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -9,7 +9,7 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 		VitePWA({
-			registerType: "prompt",
+			registerType: 'prompt',
 			injectRegister: false,
 
 			pwaAssets: {
@@ -18,24 +18,24 @@ export default defineConfig({
 			},
 
 			manifest: {
-				name: "GolfCaddie",
-				short_name: "GolfCaddie",
+				name: 'GolfCaddie',
+				short_name: 'GolfCaddie',
 				description:
-					"A golf app designed to guide you and help you achieve lower scores",
-				theme_color: "#ffffff",
+					'A golf app designed to guide you and help you achieve lower scores',
+				theme_color: '#E2F4ED',
 			},
 
 			workbox: {
-				globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
 				cleanupOutdatedCaches: true,
 				clientsClaim: true,
 			},
 
 			devOptions: {
 				enabled: false,
-				navigateFallback: "index.html",
+				navigateFallback: 'index.html',
 				suppressWarnings: true,
-				type: "module",
+				type: 'module',
 			},
 		}),
 	],
