@@ -1,13 +1,12 @@
 import {
-	GeolocateControl,
-	Layer,
-	Map as MapLibre,
+	APIProvider,
+	Map as GoogleMap,
+	type MapMouseEvent,
 	Marker,
-	Source,
-} from '@vis.gl/react-maplibre';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { useState } from 'react';
-import { createGeojsonLine, getDistance, type LatLng } from '../util/geoUtils';
+} from '@vis.gl/react-google-maps';
+import { useEffect, useState } from 'react';
+import { Polyline } from '../components/map/geometry';
+import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
 
 export default function RoundPage() {
@@ -19,9 +18,34 @@ export default function RoundPage() {
 		distance: number;
 	} | null>(null);
 
-	const handleMapClick = (e: maplibregl.MapLayerMouseEvent) => {
-		const lngLat = e.lngLat;
-		const newTarget: LatLng = { lat: lngLat.lat, lng: lngLat.lng };
+	const [mapCenter, setMapCenter] = useState<LatLng>({
+		lat: 40,
+		lng: -100,
+	});
+
+	useEffect(() => {
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				const coords = {
+					lat: pos.coords.latitude,
+					lng: pos.coords.longitude,
+				};
+				setUserPosition(coords);
+				setMapCenter(coords);
+			},
+			(error) => {
+				console.error('Geolocation failed', error);
+			},
+			{ enableHighAccuracy: true },
+		);
+	}, []);
+
+	const handleMapClick = (e: MapMouseEvent) => {
+		if (!e.detail.latLng) return;
+		const newTarget: LatLng = {
+			lat: e.detail.latLng.lat,
+			lng: e.detail.latLng.lng,
+		};
 		setTarget(newTarget);
 		if (userPosition) {
 			const distance = Math.round(getDistance(userPosition, newTarget));
@@ -37,48 +61,40 @@ export default function RoundPage() {
 		}
 	};
 
-	const geojsonLine =
-		userPosition && target ? createGeojsonLine(userPosition, target) : null;
+	const lineCoords =
+		userPosition && target
+			? [
+					{ lat: userPosition.lat, lng: userPosition.lng },
+					{ lat: target.lat, lng: target.lng },
+				]
+			: [];
 
 	return (
 		<>
-			<MapLibre
-				initialViewState={{
-					latitude: 40,
-					longitude: -100,
-					zoom: 3,
-				}}
-				mapStyle={`https://api.maptiler.com/maps/satellite/style.json?key=${import.meta.env.VITE_MAPTILER_API_KEY}`}
-				style={{ width: '100vw', height: '95vh' }}
-				onClick={handleMapClick}
-			>
-				<GeolocateControl
-					trackUserLocation={true}
-					fitBoundsOptions={{ zoom: 17, offset: [0, 100] }}
-					positionOptions={{ enableHighAccuracy: true }}
-					onGeolocate={(e) => {
-						const coords = {
-							lat: e.coords.latitude,
-							lng: e.coords.longitude,
-						};
-						setUserPosition(coords);
-					}}
-					onError={(e) => console.log(e)}
-				/>
-				{geojsonLine && (
-					<Source id='line' type='geojson' data={geojsonLine}>
-						<Layer
-							id='lineLayer'
-							type='line'
-							paint={{
-								'line-color': '#00ffff',
-								'line-width': 4,
-							}}
+			<APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAP_API_KEY}>
+				<GoogleMap
+					defaultCenter={mapCenter}
+					defaultZoom={3}
+					disableDefaultUI={true}
+					style={{ width: '100vw', height: '95vh' }}
+					onClick={handleMapClick}
+					mapTypeId='satellite'
+				>
+					{userPosition && (
+						<Marker
+							position={{ lat: userPosition.lat, lng: userPosition.lng }}
 						/>
-					</Source>
-				)}
-				{target && <Marker longitude={target.lng} latitude={target.lat} />}
-			</MapLibre>
+					)}
+					{target && <Marker position={target} />}
+					{lineCoords.length === 2 && (
+						<Polyline
+							path={lineCoords}
+							strokeColor='#00ffff'
+							strokeWeight={4}
+						/>
+					)}
+				</GoogleMap>
+			</APIProvider>
 
 			<div style={{ position: 'absolute', bottom: 10, left: 10, zIndex: 1 }}>
 				<button type='button' onClick={handleMarkBall}>
