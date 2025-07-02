@@ -6,6 +6,7 @@ import {
 } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
 import { Polyline } from '../components/map/geometry';
+import MapControls from '../components/map/MapControls';
 import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
 
@@ -93,6 +94,7 @@ export default function RoundPage() {
 							strokeWeight={4}
 						/>
 					)}
+					<MapControls />
 				</GoogleMap>
 			</APIProvider>
 
