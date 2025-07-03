@@ -1,9 +1,8 @@
 import { useRound } from '../../context/RoundContext';
 
 export default function HoleSetupPrompt() {
-	const { selectingMode } = useRound();
-
-	if (!selectingMode) return null;
+	const { state } = useRound();
+	const { selectingMode } = state;
 
 	return (
 		<div

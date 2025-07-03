@@ -9,22 +9,36 @@ import { Polyline } from './geometry';
 import MapControls from './MapControls';
 
 export default function RoundMap() {
+	const { state, dispatch } = useRound();
 	const {
 		userCoords,
-		setUserCoords,
-		shots,
+		holes,
+		currentHoleIndex,
 		teeCoords,
 		pinCoords,
 		targetCoords,
-		handleMapClick,
-	} = useRound();
+	} = {
+		...state,
+		teeCoords: state.holes[state.currentHoleIndex].tee,
+		pinCoords: state.holes[state.currentHoleIndex].pin,
+	};
+
+	const shots = holes[currentHoleIndex].shots;
 
 	const handleClick = (e: MapMouseEvent) => {
 		if (!e.detail.latLng) return;
-		handleMapClick({
+		const pos = {
 			lat: e.detail.latLng.lat,
 			lng: e.detail.latLng.lng,
-		});
+		};
+
+		if (state.selectingMode === 'tee') {
+			dispatch({ type: 'SET_TEE', payload: pos });
+		} else if (state.selectingMode === 'pin') {
+			dispatch({ type: 'SET_PIN', payload: pos });
+		} else {
+			dispatch({ type: 'SET_TARGET', payload: pos });
+		}
 	};
 
 	const lineCoords = [
@@ -52,7 +66,12 @@ export default function RoundMap() {
 				{shots.length > 0 && <Marker position={shots[shots.length - 1]} />}
 				{targetCoords && <Marker position={targetCoords} />}
 				<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
-				<MapControls userCoords={userCoords} setUserCoords={setUserCoords} />
+				<MapControls
+					userCoords={userCoords}
+					setUserCoords={(pos) =>
+						dispatch({ type: 'SET_USER_COORDS', payload: pos })
+					}
+				/>
 			</GoogleMap>
 		</APIProvider>
 	);

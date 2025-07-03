@@ -1,7 +1,15 @@
 import { useRound } from '../../context/RoundContext';
 
 export default function HoleInfoPanel() {
-	const { addShot, nextHole } = useRound();
+	const { dispatch } = useRound();
+
+	const addShot = () => {
+		dispatch({ type: 'ADD_SHOT' });
+	};
+
+	const nextHole = () => {
+		dispatch({ type: 'NEXT_HOLE' });
+	};
 
 	return (
 		<div style={{ position: 'absolute', bottom: 10, left: 10, zIndex: 1 }}>
