@@ -15,6 +15,12 @@ type ShotSuggestion = {
 	distance: number;
 } | null;
 
+type Hole = {
+	tee: LatLng | null;
+	pin: LatLng | null;
+	shots: LatLng[];
+};
+
 interface RoundContextType {
 	userCoords: LatLng | null;
 	setUserCoords: (pos: LatLng) => void;
@@ -30,30 +36,52 @@ interface RoundContextType {
 	setTarget: (pos: LatLng | null) => void;
 	suggestion: ShotSuggestion;
 	handleMapClick: (pos: LatLng) => void;
+	nextHole: () => void;
+	currentHoleIndex: number;
 }
 
 const RoundContext = createContext<RoundContextType | undefined>(undefined);
 
 export function RoundProvider({ children }: { children: ReactNode }) {
-	const [shots, setShots] = useState<LatLng[]>([]);
+	const [holes, setHoles] = useState<Hole[]>([
+		{ tee: null, pin: null, shots: [] },
+	]);
+	const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
 	const [userCoords, setUserCoords] = useState<LatLng | null>(null);
 	const [selectingMode, setSelectingMode] = useState<SelectingMode>(null);
-	const [teeCoords, setTeeCoords] = useState<LatLng | null>(null);
-	const [pinCoords, setPinCoords] = useState<LatLng | null>(null);
 	const [targetCoords, setTarget] = useState<LatLng | null>(null);
 	const [suggestion, setSuggestion] = useState<ShotSuggestion>(null);
 
+	const currentHole = holes[currentHoleIndex];
+
 	useEffect(() => {
-		if (!teeCoords) {
+		if (!currentHole.tee) {
 			setSelectingMode('tee');
-		} else if (!pinCoords) {
+		} else if (!currentHole.pin) {
 			setSelectingMode('pin');
 		}
-	}, [teeCoords, pinCoords]);
+	}, [currentHole]);
+
+	const updateCurrentHole = (updated: Hole) => {
+		setHoles((prev) =>
+			prev.map((hole, idx) => (idx === currentHoleIndex ? updated : hole)),
+		);
+	};
+
+	const setTeeCoords = (pos: LatLng) => {
+		updateCurrentHole({ ...currentHole, tee: pos });
+	};
+
+	const setPinCoords = (pos: LatLng) => {
+		updateCurrentHole({ ...currentHole, pin: pos });
+	};
 
 	const addShot = () => {
 		if (userCoords) {
-			setShots((prev) => [...prev, userCoords]);
+			updateCurrentHole({
+				...currentHole,
+				shots: [...currentHole.shots, userCoords],
+			});
 			setTarget(null);
 		}
 	};
@@ -78,21 +106,35 @@ export function RoundProvider({ children }: { children: ReactNode }) {
 		}
 	};
 
+	const nextHole = () => {
+		const nextIndex = currentHoleIndex + 1;
+		setHoles((prev) => [
+			...prev,
+			...(nextIndex < prev.length ? [] : [{ tee: null, pin: null, shots: [] }]),
+		]);
+		setCurrentHoleIndex(nextIndex);
+		setSelectingMode('tee');
+		setTarget(null);
+		setSuggestion(null);
+	};
+
 	const value: RoundContextType = {
 		userCoords,
 		setUserCoords,
-		shots,
+		shots: currentHole.shots,
 		addShot,
 		selectingMode,
 		setSelectingMode,
-		teeCoords,
-		pinCoords,
+		teeCoords: currentHole.tee,
+		pinCoords: currentHole.pin,
 		setTeeCoords,
 		setPinCoords,
 		targetCoords,
 		setTarget,
 		suggestion,
 		handleMapClick,
+		nextHole,
+		currentHoleIndex,
 	};
 
 	return (
