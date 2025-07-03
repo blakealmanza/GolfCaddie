@@ -1,8 +1,10 @@
-export default function HoleInfoPanel({
-	selectingMode,
-}: {
-	selectingMode: string;
-}) {
+import { useRound } from '../../context/RoundContext';
+
+export default function HoleSetupPrompt() {
+	const { selectingMode } = useRound();
+
+	if (!selectingMode) return null;
+
 	return (
 		<div
 			style={{
