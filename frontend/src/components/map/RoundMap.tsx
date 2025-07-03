@@ -14,27 +14,27 @@ export default function RoundMap() {
 		userCoords,
 		holes,
 		currentHoleIndex,
-		teeCoords,
-		pinCoords,
+		selectedHoleIndex,
+		selectingMode,
 		targetCoords,
-	} = {
-		...state,
-		teeCoords: state.holes[state.currentHoleIndex].tee,
-		pinCoords: state.holes[state.currentHoleIndex].pin,
-	};
+	} = state;
 
-	const shots = holes[currentHoleIndex].shots;
+	const selectedHole = holes[selectedHoleIndex];
+	const teeCoords = selectedHole.tee;
+	const pinCoords = selectedHole.pin;
+	const shots = selectedHole.shots;
 
 	const handleClick = (e: MapMouseEvent) => {
-		if (!e.detail.latLng) return;
+		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;
+
 		const pos = {
 			lat: e.detail.latLng.lat,
 			lng: e.detail.latLng.lng,
 		};
 
-		if (state.selectingMode === 'tee') {
+		if (selectingMode === 'tee') {
 			dispatch({ type: 'SET_TEE', payload: pos });
-		} else if (state.selectingMode === 'pin') {
+		} else if (selectingMode === 'pin') {
 			dispatch({ type: 'SET_PIN', payload: pos });
 		} else {
 			dispatch({ type: 'SET_TARGET', payload: pos });
@@ -44,7 +44,9 @@ export default function RoundMap() {
 	const lineCoords = [
 		...(teeCoords ? [teeCoords] : []),
 		...shots,
-		...(targetCoords ? [targetCoords] : []),
+		...(selectedHoleIndex === currentHoleIndex && targetCoords
+			? [targetCoords]
+			: []),
 		...(pinCoords ? [pinCoords] : []),
 	];
 
@@ -64,7 +66,9 @@ export default function RoundMap() {
 				{pinCoords && <Marker position={pinCoords} />}
 				{userCoords && <Marker position={userCoords} />}
 				{shots.length > 0 && <Marker position={shots[shots.length - 1]} />}
-				{targetCoords && <Marker position={targetCoords} />}
+				{selectedHoleIndex === currentHoleIndex && targetCoords && (
+					<Marker position={targetCoords} />
+				)}
 				<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
 				<MapControls
 					userCoords={userCoords}

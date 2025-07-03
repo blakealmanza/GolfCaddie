@@ -17,6 +17,7 @@ export type Hole = {
 export interface RoundState {
 	holes: Hole[];
 	currentHoleIndex: number;
+	selectedHoleIndex: number;
 	selectingMode: SelectingMode;
 	targetCoords: LatLng | null;
 	suggestion: ShotSuggestion;
@@ -30,11 +31,13 @@ export type RoundAction =
 	| { type: 'SET_TEE'; payload: LatLng }
 	| { type: 'SET_PIN'; payload: LatLng }
 	| { type: 'ADD_SHOT' }
-	| { type: 'NEXT_HOLE' };
+	| { type: 'NEXT_HOLE' }
+	| { type: 'PREVIOUS_HOLE' };
 
 export const initialRoundState: RoundState = {
 	holes: [{ tee: null, pin: null, shots: [] }],
 	currentHoleIndex: 0,
+	selectedHoleIndex: 0,
 	selectingMode: 'tee',
 	targetCoords: null,
 	suggestion: null,
@@ -101,19 +104,46 @@ export function roundReducer(
 		}
 
 		case 'NEXT_HOLE': {
-			const nextIndex = state.currentHoleIndex + 1;
-			const needsNewHole = nextIndex >= state.holes.length;
-			const holes = needsNewHole
-				? [...state.holes, { tee: null, pin: null, shots: [] }]
-				: state.holes;
+			const current = state.holes[state.currentHoleIndex];
+			if (
+				(!current.tee || !current.pin) &&
+				state.currentHoleIndex === state.selectedHoleIndex
+			) {
+				// Cannot proceed to next hole until tee and pin are set
+				return state;
+			}
 
+			const nextIndex = state.selectedHoleIndex + 1;
+			const withinBounds = nextIndex < state.holes.length;
+
+			if (withinBounds) {
+				return {
+					...state,
+					selectedHoleIndex: nextIndex,
+					currentHoleIndex:
+						nextIndex > state.currentHoleIndex
+							? nextIndex
+							: state.currentHoleIndex,
+				};
+			}
+
+			// Only create a new hole if moving past the last index
 			return {
 				...state,
 				currentHoleIndex: nextIndex,
-				holes,
+				selectedHoleIndex: nextIndex,
+				holes: [...state.holes, { tee: null, pin: null, shots: [] }],
 				selectingMode: 'tee',
 				targetCoords: null,
 				suggestion: null,
+			};
+		}
+
+		case 'PREVIOUS_HOLE': {
+			const newIndex = Math.max(0, state.selectedHoleIndex - 1);
+			return {
+				...state,
+				selectedHoleIndex: newIndex,
 			};
 		}
 
