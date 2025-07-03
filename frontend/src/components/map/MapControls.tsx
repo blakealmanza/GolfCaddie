@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { LatLng } from '../../util/geoUtils';
 
 export default function MapControls({
-	setUserPosition,
-	userPosition,
+	setUserCoords,
+	userCoords,
 }: {
-	setUserPosition: (position: LatLng) => void;
-	userPosition: LatLng | null;
+	setUserCoords: (position: LatLng) => void;
+	userCoords: LatLng | null;
 }) {
 	const map = useMap();
-	const [tracking, setTracking] = useState(false);
+	const [isTracking, setIsTracking] = useState(false);
 	const watchIdRef = useRef<number | null>(null);
 
 	useEffect(() => {
@@ -20,10 +20,10 @@ export default function MapControls({
 
 		// Stop tracking on map drag
 		const dragListener = map.addListener('dragstart', () => {
-			if (tracking && watchIdRef.current !== null) {
+			if (isTracking && watchIdRef.current !== null) {
 				navigator.geolocation.clearWatch(watchIdRef.current);
 				watchIdRef.current = null;
-				setTracking(false);
+				setIsTracking(false);
 			}
 		});
 
@@ -38,14 +38,14 @@ export default function MapControls({
 	const toggleTracking = () => {
 		if (!map) return;
 
-		if (!tracking) {
+		if (!isTracking) {
 			const id = navigator.geolocation.watchPosition(
 				(pos) => {
 					const coords = {
 						lat: pos.coords.latitude,
 						lng: pos.coords.longitude,
 					};
-					setUserPosition(coords);
+					setUserCoords(coords);
 					map.panTo(coords);
 					map.setZoom(17);
 				},
@@ -55,9 +55,9 @@ export default function MapControls({
 				{ enableHighAccuracy: true },
 			);
 			watchIdRef.current = id;
-			setTracking(true);
-		} else if (userPosition) {
-			map.panTo(userPosition);
+			setIsTracking(true);
+		} else if (userCoords) {
+			map.panTo(userCoords);
 			map.setZoom(17);
 		}
 	};

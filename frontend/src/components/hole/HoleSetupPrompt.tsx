@@ -18,7 +18,7 @@ export default function HoleSetupPrompt() {
 			}}
 		>
 			{selectingMode === 'tee' && 'Tap the map to set the tee location'}
-			{selectingMode === 'hole' && 'Tap the map to set the hole location'}
+			{selectingMode === 'pin' && 'Tap the map to set the pin location'}
 		</div>
 	);
 }

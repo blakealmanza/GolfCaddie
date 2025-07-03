@@ -8,7 +8,7 @@ import {
 import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
 
-type SelectingMode = 'tee' | 'hole' | null;
+type SelectingMode = 'tee' | 'pin' | null;
 
 type ShotSuggestion = {
 	club: string;
@@ -16,17 +16,17 @@ type ShotSuggestion = {
 } | null;
 
 interface RoundContextType {
-	userPosition: LatLng | null;
-	setUserPosition: (pos: LatLng) => void;
+	userCoords: LatLng | null;
+	setUserCoords: (pos: LatLng) => void;
 	shots: LatLng[];
 	addShot: () => void;
 	selectingMode: SelectingMode;
 	setSelectingMode: (mode: SelectingMode) => void;
-	teePosition: LatLng | null;
-	holePosition: LatLng | null;
-	setTeePosition: (pos: LatLng) => void;
-	setHolePosition: (pos: LatLng) => void;
-	target: LatLng | null;
+	teeCoords: LatLng | null;
+	pinCoords: LatLng | null;
+	setTeeCoords: (pos: LatLng) => void;
+	setPinCoords: (pos: LatLng) => void;
+	targetCoords: LatLng | null;
 	setTarget: (pos: LatLng | null) => void;
 	suggestion: ShotSuggestion;
 	handleMapClick: (pos: LatLng) => void;
@@ -36,60 +36,60 @@ const RoundContext = createContext<RoundContextType | undefined>(undefined);
 
 export function RoundProvider({ children }: { children: ReactNode }) {
 	const [shots, setShots] = useState<LatLng[]>([]);
-	const [userPosition, setUserPosition] = useState<LatLng | null>(null);
+	const [userCoords, setUserCoords] = useState<LatLng | null>(null);
 	const [selectingMode, setSelectingMode] = useState<SelectingMode>(null);
-	const [teePosition, setTeePosition] = useState<LatLng | null>(null);
-	const [holePosition, setHolePosition] = useState<LatLng | null>(null);
-	const [target, setTarget] = useState<LatLng | null>(null);
+	const [teeCoords, setTeeCoords] = useState<LatLng | null>(null);
+	const [pinCoords, setPinCoords] = useState<LatLng | null>(null);
+	const [targetCoords, setTarget] = useState<LatLng | null>(null);
 	const [suggestion, setSuggestion] = useState<ShotSuggestion>(null);
 
 	useEffect(() => {
-		if (!teePosition) {
+		if (!teeCoords) {
 			setSelectingMode('tee');
-		} else if (!holePosition) {
-			setSelectingMode('hole');
+		} else if (!pinCoords) {
+			setSelectingMode('pin');
 		}
-	}, [teePosition, holePosition]);
+	}, [teeCoords, pinCoords]);
 
 	const addShot = () => {
-		if (userPosition) {
-			setShots((prev) => [...prev, userPosition]);
+		if (userCoords) {
+			setShots((prev) => [...prev, userCoords]);
 			setTarget(null);
 		}
 	};
 
 	const handleMapClick = (clicked: LatLng) => {
 		if (selectingMode === 'tee') {
-			setTeePosition(clicked);
-			setSelectingMode('hole');
+			setTeeCoords(clicked);
+			setSelectingMode('pin');
 			return;
 		}
-		if (selectingMode === 'hole') {
-			setHolePosition(clicked);
+		if (selectingMode === 'pin') {
+			setPinCoords(clicked);
 			setSelectingMode(null);
 			return;
 		}
 
 		setTarget(clicked);
-		if (userPosition) {
-			const distance = Math.round(getDistance(userPosition, clicked));
+		if (userCoords) {
+			const distance = Math.round(getDistance(userCoords, clicked));
 			const club = suggestClub(distance);
 			setSuggestion({ club, distance });
 		}
 	};
 
 	const value: RoundContextType = {
-		userPosition,
-		setUserPosition,
+		userCoords,
+		setUserCoords,
 		shots,
 		addShot,
 		selectingMode,
 		setSelectingMode,
-		teePosition,
-		holePosition,
-		setTeePosition,
-		setHolePosition,
-		target,
+		teeCoords,
+		pinCoords,
+		setTeeCoords,
+		setPinCoords,
+		targetCoords,
 		setTarget,
 		suggestion,
 		handleMapClick,

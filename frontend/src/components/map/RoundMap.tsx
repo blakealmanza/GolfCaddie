@@ -10,12 +10,12 @@ import MapControls from './MapControls';
 
 export default function RoundMap() {
 	const {
-		userPosition,
-		setUserPosition,
+		userCoords,
+		setUserCoords,
 		shots,
-		teePosition,
-		holePosition,
-		target,
+		teeCoords,
+		pinCoords,
+		targetCoords,
 		handleMapClick,
 	} = useRound();
 
@@ -28,16 +28,16 @@ export default function RoundMap() {
 	};
 
 	const lineCoords = [
-		...(teePosition ? [teePosition] : []),
+		...(teeCoords ? [teeCoords] : []),
 		...shots,
-		...(target ? [target] : []),
-		...(holePosition ? [holePosition] : []),
+		...(targetCoords ? [targetCoords] : []),
+		...(pinCoords ? [pinCoords] : []),
 	];
 
 	return (
 		<APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAP_API_KEY}>
 			<GoogleMap
-				defaultCenter={teePosition || { lat: 40, lng: -120 }}
+				defaultCenter={teeCoords || { lat: 40, lng: -120 }}
 				defaultZoom={17}
 				minZoom={15}
 				maxZoom={20}
@@ -46,16 +46,13 @@ export default function RoundMap() {
 				onClick={handleClick}
 				mapTypeId='satellite'
 			>
-				{teePosition && <Marker position={teePosition} />}
-				{holePosition && <Marker position={holePosition} />}
-				{userPosition && <Marker position={userPosition} />}
+				{teeCoords && <Marker position={teeCoords} />}
+				{pinCoords && <Marker position={pinCoords} />}
+				{userCoords && <Marker position={userCoords} />}
 				{shots.length > 0 && <Marker position={shots[shots.length - 1]} />}
-				{target && <Marker position={target} />}
+				{targetCoords && <Marker position={targetCoords} />}
 				<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
-				<MapControls
-					userPosition={userPosition}
-					setUserPosition={setUserPosition}
-				/>
+				<MapControls userCoords={userCoords} setUserCoords={setUserCoords} />
 			</GoogleMap>
 		</APIProvider>
 	);
