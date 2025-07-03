@@ -1,7 +1,14 @@
 import { ControlPosition, MapControl, useMap } from '@vis.gl/react-google-maps';
 import { useEffect, useRef, useState } from 'react';
+import type { LatLng } from '../../util/geoUtils';
 
-export default function MapControls() {
+export default function MapControls({
+	setUserPosition,
+	userPosition,
+}: {
+	setUserPosition: (position: LatLng) => void;
+	userPosition: LatLng | null;
+}) {
 	const map = useMap();
 	const [tracking, setTracking] = useState(false);
 	const watchIdRef = useRef<number | null>(null);
@@ -9,6 +16,9 @@ export default function MapControls() {
 	useEffect(() => {
 		if (!map) return;
 
+		toggleTracking();
+
+		// Stop tracking on map drag
 		const dragListener = map.addListener('dragstart', () => {
 			if (tracking && watchIdRef.current !== null) {
 				navigator.geolocation.clearWatch(watchIdRef.current);
@@ -19,35 +29,37 @@ export default function MapControls() {
 
 		return () => {
 			dragListener.remove();
+			if (watchIdRef.current !== null) {
+				navigator.geolocation.clearWatch(watchIdRef.current);
+			}
 		};
-	}, [map, tracking]);
+	}, [map]);
 
 	const toggleTracking = () => {
 		if (!map) return;
 
-		if (tracking && watchIdRef.current !== null) {
-			navigator.geolocation.clearWatch(watchIdRef.current);
-			watchIdRef.current = null;
-			setTracking(false);
-			return;
+		if (!tracking) {
+			const id = navigator.geolocation.watchPosition(
+				(pos) => {
+					const coords = {
+						lat: pos.coords.latitude,
+						lng: pos.coords.longitude,
+					};
+					setUserPosition(coords);
+					map.panTo(coords);
+					map.setZoom(17);
+				},
+				(err) => {
+					console.error('Geolocation error:', err);
+				},
+				{ enableHighAccuracy: true },
+			);
+			watchIdRef.current = id;
+			setTracking(true);
+		} else if (userPosition) {
+			map.panTo(userPosition);
+			map.setZoom(17);
 		}
-
-		const id = navigator.geolocation.watchPosition(
-			(pos) => {
-				const coords = {
-					lat: pos.coords.latitude,
-					lng: pos.coords.longitude,
-				};
-				map.panTo(coords);
-				map.setZoom(17);
-			},
-			(err) => {
-				console.error('Geolocation error:', err);
-			},
-			{ enableHighAccuracy: true },
-		);
-		watchIdRef.current = id;
-		setTracking(true);
 	};
 
 	const zoomIn = () => {
