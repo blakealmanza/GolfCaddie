@@ -8,14 +8,20 @@ export type ShotSuggestion = {
 	distance: number;
 } | null;
 
-export type Hole = {
+export type CourseHole = {
 	tee: LatLng | null;
 	pin: LatLng | null;
+	par: number;
+};
+
+export type Hole = {
 	shots: LatLng[];
 };
 
 export interface RoundState {
-	holes: Hole[];
+	selectedCourseId: string | null;
+	courseHoles: CourseHole[];
+	roundShots: Hole[];
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
 	selectingMode: SelectingMode;
@@ -32,10 +38,17 @@ export type RoundAction =
 	| { type: 'SET_PIN'; payload: LatLng }
 	| { type: 'ADD_SHOT' }
 	| { type: 'NEXT_HOLE' }
-	| { type: 'PREVIOUS_HOLE' };
+	| { type: 'PREVIOUS_HOLE' }
+	| { type: 'SET_PAR'; payload: { index: number; par: number } }
+	| {
+			type: 'LOAD_COURSE';
+			payload: { courseId: string; courseHoles: CourseHole[] };
+	  };
 
 export const initialRoundState: RoundState = {
-	holes: [{ tee: null, pin: null, shots: [] }],
+	selectedCourseId: null,
+	courseHoles: [],
+	roundShots: [],
 	currentHoleIndex: 0,
 	selectedHoleIndex: 0,
 	selectingMode: 'tee',
@@ -48,9 +61,25 @@ export function roundReducer(
 	state: RoundState,
 	action: RoundAction,
 ): RoundState {
-	const currentHole = state.holes[state.currentHoleIndex];
+	// const currentCourseHole = state.courseHoles[state.currentHoleIndex];
+	// const currentRoundShots = state.roundShots[state.currentHoleIndex];
 
 	switch (action.type) {
+		case 'LOAD_COURSE': {
+			const roundShots = action.payload.courseHoles.map(() => ({ shots: [] }));
+			return {
+				...state,
+				selectedCourseId: action.payload.courseId,
+				courseHoles: action.payload.courseHoles,
+				roundShots,
+				currentHoleIndex: 0,
+				selectedHoleIndex: 0,
+				selectingMode: roundShots.length === 0 ? 'tee' : null,
+				targetCoords: null,
+				suggestion: null,
+			};
+		}
+
 		case 'SET_USER_COORDS':
 			return { ...state, userCoords: action.payload };
 
@@ -71,40 +100,51 @@ export function roundReducer(
 		}
 
 		case 'SET_TEE': {
-			const updated = { ...currentHole, tee: action.payload };
-			const newHoles = [...state.holes];
-			newHoles[state.currentHoleIndex] = updated;
+			const updatedCourseHoles = [...state.courseHoles];
+			updatedCourseHoles[state.currentHoleIndex] = {
+				...updatedCourseHoles[state.currentHoleIndex],
+				tee: action.payload,
+			};
 			return {
 				...state,
-				holes: newHoles,
+				courseHoles: updatedCourseHoles,
 				selectingMode: 'pin',
 			};
 		}
 
 		case 'SET_PIN': {
-			const updated = { ...currentHole, pin: action.payload };
-			const newHoles = [...state.holes];
-			newHoles[state.currentHoleIndex] = updated;
+			const updatedCourseHoles = [...state.courseHoles];
+			updatedCourseHoles[state.currentHoleIndex] = {
+				...updatedCourseHoles[state.currentHoleIndex],
+				pin: action.payload,
+			};
 			return {
 				...state,
-				holes: newHoles,
+				courseHoles: updatedCourseHoles,
 				selectingMode: null,
 			};
 		}
 
+		case 'SET_PAR': {
+			const { index, par } = action.payload;
+			const updatedCourseHoles = [...state.courseHoles];
+			updatedCourseHoles[index] = { ...updatedCourseHoles[index], par };
+			return { ...state, courseHoles: updatedCourseHoles };
+		}
+
 		case 'ADD_SHOT': {
 			if (!state.userCoords) return state;
-			const updated = {
-				...currentHole,
-				shots: [...currentHole.shots, state.userCoords],
+			const updatedRoundShots = [...state.roundShots];
+			const currentShots =
+				updatedRoundShots[state.currentHoleIndex]?.shots || [];
+			updatedRoundShots[state.currentHoleIndex] = {
+				shots: [...currentShots, state.userCoords],
 			};
-			const newHoles = [...state.holes];
-			newHoles[state.currentHoleIndex] = updated;
-			return { ...state, holes: newHoles, targetCoords: null };
+			return { ...state, roundShots: updatedRoundShots, targetCoords: null };
 		}
 
 		case 'NEXT_HOLE': {
-			const current = state.holes[state.currentHoleIndex];
+			const current = state.courseHoles[state.currentHoleIndex];
 			if (
 				(!current.tee || !current.pin) &&
 				state.currentHoleIndex === state.selectedHoleIndex
@@ -114,7 +154,7 @@ export function roundReducer(
 			}
 
 			const nextIndex = state.selectedHoleIndex + 1;
-			const withinBounds = nextIndex < state.holes.length;
+			const withinBounds = nextIndex < state.courseHoles.length;
 
 			if (withinBounds) {
 				return {
@@ -132,7 +172,8 @@ export function roundReducer(
 				...state,
 				currentHoleIndex: nextIndex,
 				selectedHoleIndex: nextIndex,
-				holes: [...state.holes, { tee: null, pin: null, shots: [] }],
+				courseHoles: [...state.courseHoles, { tee: null, pin: null, par: 0 }],
+				roundShots: [...state.roundShots, { shots: [] }],
 				selectingMode: 'tee',
 				targetCoords: null,
 				suggestion: null,

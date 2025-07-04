@@ -8,14 +8,14 @@ export function usePersistedReducer<R extends React.Reducer<any, any>>(
 	const persisted = localStorage.getItem(key);
 	const parsed = persisted ? JSON.parse(persisted) : null;
 	const mergedState = parsed
-		? { ...initialState, holes: parsed.holes }
+		? { ...initialState, roundShots: parsed.roundShots }
 		: initialState;
 
 	const [state, dispatch] = useReducer(reducer, mergedState);
 
 	useEffect(() => {
-		localStorage.setItem(key, JSON.stringify({ holes: state.holes }));
-	}, [state.holes, key]);
+		localStorage.setItem(key, JSON.stringify({ roundShots: state.roundShots }));
+	}, [state.roundShots, key]);
 
 	return [state, dispatch];
 }
