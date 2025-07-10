@@ -1,7 +1,7 @@
 import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
 
-export type SelectingMode = 'tee' | 'pin' | null;
+export type SelectingMode = 'tee' | 'pin' | 'target' | 'none';
 
 export type ShotSuggestion = {
 	club: string;
@@ -40,7 +40,7 @@ export type RoundAction =
 			type: 'LOAD_COURSE';
 			payload: {
 				courseId: string;
-				holes: { tee: LatLng | null; pin: LatLng | null; par: number }[];
+				holes: Hole[];
 			};
 	  };
 
@@ -51,7 +51,7 @@ export const initialRoundState: RoundState = {
 			tee: null,
 			pin: null,
 			par: 4,
-			shots: [],
+			shots: [] as LatLng[],
 		},
 	],
 	currentHoleIndex: 0,
@@ -72,7 +72,7 @@ export function roundReducer(
 				tee: hole.tee,
 				pin: hole.pin,
 				par: hole.par,
-				shots: [],
+				shots: [] as LatLng[],
 			}));
 			return {
 				...state,
@@ -80,7 +80,7 @@ export function roundReducer(
 				holes,
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
-				selectingMode: holes.length === 0 ? 'tee' : null,
+				selectingMode: holes[0].tee && holes[0].pin ? 'target' : 'tee',
 				targetCoords: null,
 				suggestion: null,
 			};
@@ -127,7 +127,7 @@ export function roundReducer(
 			return {
 				...state,
 				holes: updatedHoles,
-				selectingMode: null,
+				selectingMode: 'target',
 			};
 		}
 
@@ -178,7 +178,10 @@ export function roundReducer(
 				...state,
 				currentHoleIndex: nextIndex,
 				selectedHoleIndex: nextIndex,
-				holes: [...state.holes, { tee: null, pin: null, par: 0, shots: [] }],
+				holes: [
+					...state.holes,
+					{ tee: null, pin: null, par: 0, shots: [] as LatLng[] },
+				],
 				selectingMode: 'tee',
 				targetCoords: null,
 				suggestion: null,
