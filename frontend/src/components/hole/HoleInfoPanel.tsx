@@ -2,7 +2,7 @@ import { useRound } from '../../context/RoundContext';
 
 export default function HoleInfoPanel() {
 	const { state, dispatch } = useRound();
-	const { currentHoleIndex, selectedHoleIndex, courseHoles } = state;
+	const { currentHoleIndex, selectedHoleIndex, holes } = state;
 
 	const addShot = () => {
 		dispatch({ type: 'ADD_SHOT' });
@@ -16,7 +16,7 @@ export default function HoleInfoPanel() {
 		dispatch({ type: 'PREVIOUS_HOLE' });
 	};
 
-	const selectedCourseHole = courseHoles[selectedHoleIndex];
+	const selectedCourseHole = holes[selectedHoleIndex];
 	// const selectedRoundHole = roundShots[selectedHoleIndex];
 
 	const handleParChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,25 +1,32 @@
-import type { CourseHole } from '../context/roundReducer';
+import type { Hole } from '../context/roundReducer';
 
 interface Course {
 	[key: string]: {
-		courseHoles: CourseHole[];
+		holes: Hole[];
 	};
 }
 
 const COURSE: Course = {
 	123: {
-		courseHoles: [],
+		holes: [
+			{
+				tee: null,
+				pin: null,
+				par: 4,
+				shots: [],
+			},
+		],
 	},
 };
 
 export async function fetchCourseById(
 	courseId: string,
-): Promise<{ courseHoles: CourseHole[] }> {
+): Promise<{ holes: Hole[] }> {
 	const course = COURSE[courseId];
 
 	if (!course) {
 		throw new Error(`Course with ID "${courseId}" not found.`);
 	}
 
-	return Promise.resolve({ courseHoles: course.courseHoles });
+	return Promise.resolve({ holes: course.holes });
 }

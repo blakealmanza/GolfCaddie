@@ -12,20 +12,21 @@ export default function RoundMap() {
 	const { state, dispatch } = useRound();
 	const {
 		userCoords,
-		courseHoles,
-		roundShots,
+		holes,
 		currentHoleIndex,
 		selectedHoleIndex,
 		selectingMode,
 		targetCoords,
 	} = state;
 
-	const selectedCourseHole = courseHoles[selectedHoleIndex] || {};
-	const selectedRoundHole = roundShots[selectedHoleIndex] || { shots: [] };
+	console.log(state);
 
-	const teeCoords = selectedCourseHole.tee;
-	const pinCoords = selectedCourseHole.pin;
-	const shots = selectedRoundHole.shots;
+	const selectedHole = holes[selectedHoleIndex] || {};
+	// const selectedRoundHole = roundShots[selectedHoleIndex] || { shots: [] };
+
+	const teeCoords = selectedHole.tee;
+	const pinCoords = selectedHole.pin;
+	const shots = selectedHole.shots;
 
 	const handleClick = (e: MapMouseEvent) => {
 		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;

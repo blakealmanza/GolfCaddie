@@ -1,11 +1,12 @@
-import { createContext, type ReactNode, useContext } from 'react';
+import { createContext, type ReactNode, useContext, useReducer } from 'react';
 import {
 	initialRoundState,
 	type RoundAction,
 	type RoundState,
 	roundReducer,
 } from './roundReducer';
-import { usePersistedReducer } from './usePersistedReducer';
+
+// import { usePersistedReducer } from './usePersistedReducer';
 
 interface RoundContextType {
 	state: RoundState;
@@ -15,11 +16,7 @@ interface RoundContextType {
 const RoundContext = createContext<RoundContextType | undefined>(undefined);
 
 export function RoundProvider({ children }: { children: ReactNode }) {
-	const [state, dispatch] = usePersistedReducer(
-		roundReducer,
-		'golf-round',
-		initialRoundState,
-	);
+	const [state, dispatch] = useReducer(roundReducer, initialRoundState);
 
 	return (
 		<RoundContext.Provider value={{ state, dispatch }}>
