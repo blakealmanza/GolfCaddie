@@ -26,8 +26,9 @@ export default function RoundContent() {
 
 	return (
 		<>
-			<RoundMap />
-			<HoleInfoPanel />
+			<RoundMap>
+				{({ addShot }) => <HoleInfoPanel addShot={addShot} />}
+			</RoundMap>
 			<HoleSetupPrompt />
 		</>
 	);

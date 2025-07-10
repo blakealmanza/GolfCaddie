@@ -24,14 +24,7 @@ export function holeReducer(hole: RoundHole, action: HoleAction): RoundHole {
 		case 'ADD_SHOT':
 			return {
 				...hole,
-				shots: [
-					...hole.shots,
-					{
-						position: action.payload.position,
-						target: action.payload.target,
-						suggestion: action.payload.suggestion,
-					},
-				],
+				shots: [...hole.shots, action.payload],
 			};
 
 		case 'RESET_HOLE':

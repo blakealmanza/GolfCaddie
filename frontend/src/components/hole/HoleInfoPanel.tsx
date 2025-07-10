@@ -1,12 +1,8 @@
 import { useRound } from '../../context/RoundContext';
 
-export default function HoleInfoPanel() {
+export default function HoleInfoPanel({ addShot }: { addShot: () => void }) {
 	const { state, dispatch } = useRound();
 	const { currentHoleIndex, selectedHoleIndex, holes } = state;
-
-	const addShot = () => {
-		dispatch({ type: 'ADD_SHOT' });
-	};
 
 	const nextHole = () => {
 		dispatch({ type: 'NEXT_HOLE' });

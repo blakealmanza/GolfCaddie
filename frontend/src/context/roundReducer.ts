@@ -1,12 +1,5 @@
-import type {
-	CourseHole,
-	RoundHole,
-	SelectingMode,
-	Shot,
-	ShotSuggestion,
-} from '@/types';
-import { getDistance, type LatLng } from '../util/geoUtils';
-import { suggestClub } from '../util/suggestClub';
+import type { CourseHole, RoundHole, SelectingMode, Shot } from '@/types';
+import type { LatLng } from '../util/geoUtils';
 import { holeReducer } from './holeReducer';
 
 export interface RoundState {
@@ -14,8 +7,6 @@ export interface RoundState {
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
 	selectingMode: SelectingMode;
-	targetCoords: LatLng | null;
-	suggestion: ShotSuggestion;
 	userCoords: LatLng | null;
 }
 
@@ -25,7 +16,7 @@ export type RoundAction =
 	| { type: 'SET_TARGET'; payload: LatLng | null }
 	| { type: 'SET_TEE'; payload: LatLng }
 	| { type: 'SET_PIN'; payload: LatLng }
-	| { type: 'ADD_SHOT' }
+	| { type: 'ADD_SHOT'; payload: Shot }
 	| { type: 'NEXT_HOLE' }
 	| { type: 'PREVIOUS_HOLE' }
 	| { type: 'SET_PAR'; payload: number }
@@ -48,8 +39,6 @@ export const initialRoundState: RoundState = {
 	currentHoleIndex: 0,
 	selectedHoleIndex: 0,
 	selectingMode: 'tee',
-	targetCoords: null,
-	suggestion: null,
 	userCoords: null,
 };
 
@@ -71,8 +60,6 @@ export function roundReducer(
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
 				selectingMode: holes[0].tee && holes[0].pin ? 'target' : 'tee',
-				targetCoords: null,
-				suggestion: null,
 			};
 		}
 
@@ -82,18 +69,18 @@ export function roundReducer(
 		case 'SET_SELECTING_MODE':
 			return { ...state, selectingMode: action.payload };
 
-		case 'SET_TARGET': {
-			const target = action.payload;
-			let suggestion = null;
-			if (target && state.userCoords) {
-				const distance = Math.round(getDistance(state.userCoords, target));
-				suggestion = {
-					club: suggestClub(distance),
-					distance,
-				};
-			}
-			return { ...state, targetCoords: target, suggestion };
-		}
+		// case 'SET_TARGET': {
+		// 	const target = action.payload;
+		// 	let suggestion = null;
+		// 	if (target && state.userCoords) {
+		// 		const distance = Math.round(getDistance(state.userCoords, target));
+		// 		suggestion = {
+		// 			club: suggestClub(distance),
+		// 			distance,
+		// 		};
+		// 	}
+		// 	return { ...state, targetCoords: target, suggestion };
+		// }
 
 		case 'SET_TEE': {
 			const updatedHoles = [...state.holes];
@@ -134,7 +121,7 @@ export function roundReducer(
 		}
 
 		case 'ADD_SHOT': {
-			if (!state.userCoords) return state;
+			const { position, target, suggestion } = action.payload;
 
 			const updatedHoles = [...state.holes];
 			updatedHoles[state.currentHoleIndex] = holeReducer(
@@ -142,17 +129,15 @@ export function roundReducer(
 				{
 					type: 'ADD_SHOT',
 					payload: {
-						position: state.userCoords,
-						target: state.targetCoords,
-						suggestion: state.suggestion,
+						position,
+						target,
+						suggestion,
 					},
 				},
 			);
 			return {
 				...state,
 				holes: updatedHoles,
-				targetCoords: null,
-				suggestion: null,
 			};
 		}
 
@@ -190,8 +175,6 @@ export function roundReducer(
 					{ tee: null, pin: null, par: 0, shots: [] as Shot[] },
 				],
 				selectingMode: 'tee',
-				targetCoords: null,
-				suggestion: null,
 			};
 		}
 
