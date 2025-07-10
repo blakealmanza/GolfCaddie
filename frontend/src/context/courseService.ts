@@ -1,8 +1,8 @@
-import type { Hole } from '../context/roundReducer';
+import type { CourseHole } from '@/types';
 
 interface Course {
 	[key: string]: {
-		holes: Hole[];
+		holes: CourseHole[];
 	};
 }
 
@@ -13,7 +13,6 @@ const COURSE: Course = {
 				tee: null,
 				pin: null,
 				par: 4,
-				shots: [],
 			},
 		],
 	},
@@ -21,7 +20,7 @@ const COURSE: Course = {
 
 export async function fetchCourseById(
 	courseId: string,
-): Promise<{ holes: Hole[] }> {
+): Promise<{ holes: CourseHole[] }> {
 	const course = COURSE[courseId];
 
 	if (!course) {

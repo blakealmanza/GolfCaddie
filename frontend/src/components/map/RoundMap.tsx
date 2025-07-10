@@ -4,6 +4,7 @@ import {
 	type MapMouseEvent,
 	Marker,
 } from '@vis.gl/react-google-maps';
+import type { RoundHole, Shot } from '@/types';
 import { useRound } from '../../context/RoundContext';
 import { Polyline } from './geometry';
 import MapControls from './MapControls';
@@ -21,12 +22,12 @@ export default function RoundMap() {
 
 	console.log(state);
 
-	const selectedHole = holes[selectedHoleIndex] || {};
+	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
 	// const selectedRoundHole = roundShots[selectedHoleIndex] || { shots: [] };
 
 	const teeCoords = selectedHole.tee;
 	const pinCoords = selectedHole.pin;
-	const shots = selectedHole.shots;
+	const shots: Shot[] = selectedHole.shots || [];
 
 	const handleClick = (e: MapMouseEvent) => {
 		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;
@@ -40,14 +41,14 @@ export default function RoundMap() {
 			dispatch({ type: 'SET_TEE', payload: pos });
 		} else if (selectingMode === 'pin') {
 			dispatch({ type: 'SET_PIN', payload: pos });
-		} else {
+		} else if (selectingMode === 'target') {
 			dispatch({ type: 'SET_TARGET', payload: pos });
 		}
 	};
 
 	const lineCoords = [
 		...(teeCoords ? [teeCoords] : []),
-		...shots,
+		...shots.map((s) => s.position),
 		...(selectedHoleIndex === currentHoleIndex && targetCoords
 			? [targetCoords]
 			: []),
@@ -69,7 +70,9 @@ export default function RoundMap() {
 				{teeCoords && <Marker position={teeCoords} />}
 				{pinCoords && <Marker position={pinCoords} />}
 				{userCoords && <Marker position={userCoords} />}
-				{shots.length > 0 && <Marker position={shots[shots.length - 1]} />}
+				{shots.length > 0 && (
+					<Marker position={shots[shots.length - 1].position} />
+				)}
 				{selectedHoleIndex === currentHoleIndex && targetCoords && (
 					<Marker position={targetCoords} />
 				)}
