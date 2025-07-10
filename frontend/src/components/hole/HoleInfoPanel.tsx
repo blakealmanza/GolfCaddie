@@ -22,7 +22,7 @@ export default function HoleInfoPanel() {
 	const handleParChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		dispatch({
 			type: 'SET_PAR',
-			payload: { index: selectedHoleIndex, par: parseInt(e.target.value, 10) },
+			payload: parseInt(e.target.value, 10),
 		});
 	};
 

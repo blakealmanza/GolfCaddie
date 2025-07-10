@@ -7,6 +7,7 @@ import type {
 } from '@/types';
 import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
+import { holeReducer } from './holeReducer';
 
 export interface RoundState {
 	holes: RoundHole[];
@@ -27,7 +28,7 @@ export type RoundAction =
 	| { type: 'ADD_SHOT' }
 	| { type: 'NEXT_HOLE' }
 	| { type: 'PREVIOUS_HOLE' }
-	| { type: 'SET_PAR'; payload: { index: number; par: number } }
+	| { type: 'SET_PAR'; payload: number }
 	| {
 			type: 'LOAD_COURSE';
 			payload: {
@@ -96,10 +97,10 @@ export function roundReducer(
 
 		case 'SET_TEE': {
 			const updatedHoles = [...state.holes];
-			updatedHoles[state.currentHoleIndex] = {
-				...updatedHoles[state.currentHoleIndex],
-				tee: action.payload,
-			};
+			updatedHoles[state.currentHoleIndex] = holeReducer(
+				updatedHoles[state.currentHoleIndex],
+				{ type: 'SET_TEE', payload: action.payload },
+			);
 			return {
 				...state,
 				holes: updatedHoles,
@@ -109,10 +110,10 @@ export function roundReducer(
 
 		case 'SET_PIN': {
 			const updatedHoles = [...state.holes];
-			updatedHoles[state.currentHoleIndex] = {
-				...updatedHoles[state.currentHoleIndex],
-				pin: action.payload,
-			};
+			updatedHoles[state.currentHoleIndex] = holeReducer(
+				updatedHoles[state.currentHoleIndex],
+				{ type: 'SET_PIN', payload: action.payload },
+			);
 			return {
 				...state,
 				holes: updatedHoles,
@@ -121,28 +122,38 @@ export function roundReducer(
 		}
 
 		case 'SET_PAR': {
-			const { index, par } = action.payload;
 			const updatedHoles = [...state.holes];
-			updatedHoles[index] = { ...updatedHoles[index], par };
+			updatedHoles[state.currentHoleIndex] = holeReducer(
+				updatedHoles[state.currentHoleIndex],
+				{
+					type: 'SET_PAR',
+					payload: action.payload,
+				},
+			);
 			return { ...state, holes: updatedHoles };
 		}
 
 		case 'ADD_SHOT': {
 			if (!state.userCoords) return state;
+
 			const updatedHoles = [...state.holes];
-			const currentHole = updatedHoles[state.currentHoleIndex];
-			updatedHoles[state.currentHoleIndex] = {
-				...currentHole,
-				shots: [
-					...currentHole.shots,
-					{
+			updatedHoles[state.currentHoleIndex] = holeReducer(
+				updatedHoles[state.currentHoleIndex],
+				{
+					type: 'ADD_SHOT',
+					payload: {
 						position: state.userCoords,
 						target: state.targetCoords,
 						suggestion: state.suggestion,
 					},
-				],
+				},
+			);
+			return {
+				...state,
+				holes: updatedHoles,
+				targetCoords: null,
+				suggestion: null,
 			};
-			return { ...state, holes: updatedHoles, targetCoords: null };
 		}
 
 		case 'NEXT_HOLE': {
