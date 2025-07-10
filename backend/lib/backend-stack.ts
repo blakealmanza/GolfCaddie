@@ -1,11 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import type { Construct } from 'constructs';
 
 export class BackendStack extends cdk.Stack {
+	public readonly api: apigateway.RestApi;
+	public readonly logShotIntegration: apigateway.LambdaIntegration;
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
@@ -18,7 +21,7 @@ export class BackendStack extends cdk.Stack {
 		});
 
 		// S3: Course data bucket
-		const courseBucket = new s3.Bucket(this, 'CourseDataBucket', {
+		new s3.Bucket(this, 'CourseDataBucket', {
 			bucketName: 'golf-caddie-courses',
 			blockPublicAccess: {
 				blockPublicAcls: false,
@@ -45,17 +48,48 @@ export class BackendStack extends cdk.Stack {
 		shotsTable.grantWriteData(logShotFn);
 
 		// API Gateway
-		const api = new apigateway.RestApi(this, 'GolfCaddieAPI', {
+		this.api = new apigateway.RestApi(this, 'GolfCaddieAPI', {
 			restApiName: 'Golf Caddie Service',
 			deployOptions: {
 				stageName: 'prod',
 			},
 		});
+		this.logShotIntegration = new apigateway.LambdaIntegration(logShotFn);
 
-		const logShotResource = api.root.addResource('log-shot');
-		logShotResource.addMethod(
-			'POST',
-			new apigateway.LambdaIntegration(logShotFn),
+		// Cognito: User Pool
+		const userPool = new cognito.UserPool(this, 'GolfCaddieUserPool', {
+			selfSignUpEnabled: true,
+			signInAliases: { email: true },
+			autoVerify: { email: true },
+			accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+		});
+
+		// Cognito: User Pool Client
+		userPool.addClient('UserPoolClient', {
+			authFlows: {
+				userPassword: true,
+				userSrp: true,
+			},
+			preventUserExistenceErrors: true,
+		});
+
+		// Cognito: API Gateway Authorizer
+		const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
+			this,
+			'APIGatewayAuthorizer',
+			{
+				cognitoUserPools: [userPool],
+			},
 		);
+
+		// API Gateway: Add POST method to /log-shot with Cognito auth
+		const logShotResource = this.api.root.addResource('log-shot');
+		if (logShotResource) {
+			logShotResource.addMethod('POST', this.logShotIntegration, {
+				authorizationType: apigateway.AuthorizationType.COGNITO,
+				authorizer,
+			});
+		}
 	}
 }
