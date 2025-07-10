@@ -15,10 +15,9 @@ export default function RoundContent() {
 
 		const loadCourse = async () => {
 			const courseData = await fetchCourseById(courseId);
-			console.log('Loaded course holes:', courseData.holes); // Debug log
 			dispatch({
 				type: 'LOAD_COURSE',
-				payload: { courseId, holes: courseData.holes },
+				payload: { holes: courseData.holes },
 			});
 		};
 

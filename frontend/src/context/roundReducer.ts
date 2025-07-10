@@ -9,7 +9,6 @@ import { getDistance, type LatLng } from '../util/geoUtils';
 import { suggestClub } from '../util/suggestClub';
 
 export interface RoundState {
-	selectedCourseId: string | null;
 	holes: RoundHole[];
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
@@ -32,13 +31,11 @@ export type RoundAction =
 	| {
 			type: 'LOAD_COURSE';
 			payload: {
-				courseId: string;
 				holes: CourseHole[];
 			};
 	  };
 
 export const initialRoundState: RoundState = {
-	selectedCourseId: null,
 	holes: [
 		{
 			tee: null,
@@ -69,7 +66,6 @@ export function roundReducer(
 			}));
 			return {
 				...state,
-				selectedCourseId: action.payload.courseId,
 				holes,
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
