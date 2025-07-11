@@ -1,11 +1,19 @@
+import type { SelectingMode } from '@/types';
 import { useRound } from '../../context/RoundContext';
 
-export default function HoleInfoPanel({ addShot }: { addShot: () => void }) {
+export default function HoleInfoPanel({
+	addShot,
+	setSelectingMode,
+}: {
+	addShot: () => void;
+	setSelectingMode: (mode: SelectingMode) => void;
+}) {
 	const { state, dispatch } = useRound();
 	const { currentHoleIndex, selectedHoleIndex, holes } = state;
 
 	const nextHole = () => {
 		dispatch({ type: 'NEXT_HOLE' });
+		setSelectingMode('tee');
 	};
 
 	const previousHole = () => {

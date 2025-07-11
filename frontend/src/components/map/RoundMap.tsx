@@ -5,7 +5,13 @@ import {
 	Marker,
 } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
-import type { LatLng, RoundHole, Shot, ShotSuggestion } from '@/types';
+import type {
+	LatLng,
+	RoundHole,
+	SelectingMode,
+	Shot,
+	ShotSuggestion,
+} from '@/types';
 import { useRound } from '../../context/RoundContext';
 import { getDistance } from '../../util/geoUtils';
 import { suggestClub } from '../../util/suggestClub';
@@ -15,20 +21,21 @@ import MapControls from './MapControls';
 export default function RoundMap({
 	children,
 }: {
-	children: (props: { addShot: () => void }) => React.ReactNode;
+	children: (props: {
+		addShot: () => void;
+		setSelectingMode: (mode: SelectingMode) => void;
+	}) => React.ReactNode;
 }) {
 	const { state, dispatch } = useRound();
+	const { holes, currentHoleIndex, selectedHoleIndex } = state;
+
 	const [target, setTarget] = useState<LatLng | null>(null);
 	const [suggestion, setSuggestion] = useState<ShotSuggestion | null>(null);
-	const {
-		userCoords,
-		holes,
-		currentHoleIndex,
-		selectedHoleIndex,
-		selectingMode,
-	} = state;
+	const [userCoords, setUserCoords] = useState<LatLng | null>(null);
+	const [selectingMode, setSelectingMode] = useState<SelectingMode>('tee');
 
-	console.log(state);
+	// console.log(state);
+	console.log(target, suggestion, userCoords, selectingMode);
 
 	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
 
@@ -58,8 +65,10 @@ export default function RoundMap({
 
 		if (selectingMode === 'tee') {
 			dispatch({ type: 'SET_TEE', payload: pos });
+			setSelectingMode('pin');
 		} else if (selectingMode === 'pin') {
 			dispatch({ type: 'SET_PIN', payload: pos });
+			setSelectingMode('target');
 		} else if (selectingMode === 'target') {
 			setTarget(pos);
 		}
@@ -109,15 +118,10 @@ export default function RoundMap({
 						<Marker position={target} />
 					)}
 					<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
-					<MapControls
-						userCoords={userCoords}
-						setUserCoords={(pos) =>
-							dispatch({ type: 'SET_USER_COORDS', payload: pos })
-						}
-					/>
+					<MapControls userCoords={userCoords} setUserCoords={setUserCoords} />
 				</GoogleMap>
 			</APIProvider>
-			{children({ addShot })}
+			{children({ addShot, setSelectingMode })}
 		</>
 	);
 }

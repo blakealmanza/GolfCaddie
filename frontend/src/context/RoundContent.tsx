@@ -27,7 +27,12 @@ export default function RoundContent() {
 	return (
 		<>
 			<RoundMap>
-				{({ addShot }) => <HoleInfoPanel addShot={addShot} />}
+				{({ addShot, setSelectingMode }) => (
+					<HoleInfoPanel
+						addShot={addShot}
+						setSelectingMode={setSelectingMode}
+					/>
+				)}
 			</RoundMap>
 			<HoleSetupPrompt />
 		</>
