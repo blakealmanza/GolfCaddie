@@ -58,6 +58,12 @@ export default function RoundMap({
 		}
 	}, [target, userCoords]);
 
+	useEffect(() => {
+		// Clear target when switching to a new hole
+		setTarget(null);
+		setSuggestion(null);
+	}, [selectedHoleIndex]);
+
 	const handleClick = (e: MapMouseEvent) => {
 		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;
 
