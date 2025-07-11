@@ -34,10 +34,13 @@ export default function RoundMap({
 	const [userCoords, setUserCoords] = useState<LatLng | null>(null);
 	const [selectingMode, setSelectingMode] = useState<SelectingMode>('tee');
 
-	// console.log(state);
-	console.log(target, suggestion, userCoords, selectingMode);
-
 	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
+
+	useEffect(() => {
+		if (selectedHole.tee && selectedHole.pin) {
+			setSelectingMode('target');
+		}
+	}, [selectedHole.tee, selectedHole.pin]);
 
 	const teeCoords = selectedHole.tee;
 	const pinCoords = selectedHole.pin;
