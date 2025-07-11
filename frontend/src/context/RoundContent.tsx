@@ -3,26 +3,26 @@ import { useParams } from 'react-router-dom';
 import HoleInfoPanel from '../components/hole/HoleInfoPanel';
 import HoleSetupPrompt from '../components/hole/HoleSetupPrompt';
 import RoundMap from '../components/map/RoundMap';
-import { fetchCourseById } from '../context/courseService';
 import { useRound } from '../context/RoundContext';
+import { fetchRoundById } from './roundService';
 
 export default function RoundContent() {
-	const { courseId } = useParams();
+	const { roundId } = useParams();
 	const { dispatch } = useRound();
 
 	useEffect(() => {
-		if (!courseId) return;
+		if (!roundId) return;
 
 		const loadCourse = async () => {
-			const courseData = await fetchCourseById(courseId);
+			const roundData = await fetchRoundById(roundId);
 			dispatch({
 				type: 'LOAD_COURSE',
-				payload: { holes: courseData.holes },
+				payload: { holes: roundData.holes },
 			});
 		};
 
 		loadCourse();
-	}, [courseId, dispatch]);
+	}, [roundId, dispatch]);
 
 	return (
 		<>

@@ -5,8 +5,7 @@ export default function AppLayout() {
 		<div>
 			<nav style={{ display: 'flex', gap: '2rem' }}>
 				<NavLink to='/'>Home</NavLink>
-				<NavLink to='/round/abc'>Play Exisiting Course</NavLink>
-				<NavLink to='/round/123'>Play New Course</NavLink>
+				<NavLink to='/start'>Start Round</NavLink>
 			</nav>
 			<main>
 				<Outlet />

@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout.tsx';
 import HomePage from './pages/HomePage.tsx';
 import RoundPage from './pages/RoundPage.tsx';
+import StartRoundPage from './pages/StartRoundPage.tsx';
 
 const router = createBrowserRouter([
 	{
@@ -12,7 +13,11 @@ const router = createBrowserRouter([
 		children: [
 			{ index: true, element: <HomePage /> },
 			{
-				path: 'round/:courseId',
+				path: 'start',
+				element: <StartRoundPage />,
+			},
+			{
+				path: 'round/:roundId',
 				element: <RoundPage />,
 			},
 		],

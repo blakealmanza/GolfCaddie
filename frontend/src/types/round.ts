@@ -23,6 +23,6 @@ export type Round = {
 	userId: string;
 	courseId: string;
 	startedAt: number;
-	endedAt: number;
+	endedAt?: number;
 	holes: RoundHole[];
 };

@@ -1,13 +1,15 @@
 import type { CourseHole } from '@/types';
 
-interface Course {
+interface CourseDB {
 	[key: string]: {
+		name: string;
 		holes: CourseHole[];
 	};
 }
 
-const COURSE: Course = {
-	123: {
+const COURSE: CourseDB = {
+	'123': {
+		name: 'Test Course',
 		holes: [
 			{
 				tee: null,
@@ -18,7 +20,7 @@ const COURSE: Course = {
 	},
 };
 
-export async function fetchCourseById(
+export async function fetchCourseHolesById(
 	courseId: string,
 ): Promise<{ holes: CourseHole[] }> {
 	const course = COURSE[courseId];
