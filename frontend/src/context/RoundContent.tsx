@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import HoleInfoPanel from '../components/hole/HoleInfoPanel';
-import HoleSetupPrompt from '../components/hole/HoleSetupPrompt';
 import RoundMap from '../components/map/RoundMap';
 import { useRound } from '../context/RoundContext';
 import { fetchRoundById } from './roundService';
@@ -34,7 +33,6 @@ export default function RoundContent() {
 					/>
 				)}
 			</RoundMap>
-			<HoleSetupPrompt />
 		</>
 	);
 }
