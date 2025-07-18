@@ -1,10 +1,19 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import { AuthProvider } from 'react-oidc-context';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout.tsx';
 import HomePage from './pages/HomePage.tsx';
 import RoundPage from './pages/RoundPage.tsx';
 import StartRoundPage from './pages/StartRoundPage.tsx';
+
+const cognitoAuthConfig = {
+	authority: import.meta.env.VITE_COGNITO_AUTHORITY,
+	client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+	redirect_uri: 'https://golfcaddie.dev', // localhost:5173 for dev, golfcaddie.dev for prod
+	response_type: 'code',
+	scope: 'aws.cognito.signin.user.admin email openid',
+};
 
 const router = createBrowserRouter([
 	{
@@ -12,14 +21,8 @@ const router = createBrowserRouter([
 		element: <AppLayout />,
 		children: [
 			{ index: true, element: <HomePage /> },
-			{
-				path: 'start',
-				element: <StartRoundPage />,
-			},
-			{
-				path: 'round/:roundId',
-				element: <RoundPage />,
-			},
+			{ path: 'start', element: <StartRoundPage /> },
+			{ path: 'round/:roundId', element: <RoundPage /> },
 		],
 	},
 ]);
@@ -28,9 +31,11 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
 	createRoot(rootElement).render(
-		// <StrictMode>
-		<RouterProvider router={router} />,
-		// </StrictMode>,
+		// <React.StrictMode>
+		<AuthProvider {...cognitoAuthConfig}>
+			<RouterProvider router={router} />
+		</AuthProvider>,
+		// </React.StrictMode>
 	);
 } else {
 	console.error('Root container not found');
