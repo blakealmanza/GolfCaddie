@@ -12,10 +12,21 @@ export class BackendStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
-		// DynamoDB: Shots table
-		const shotsTable = new dynamodb.Table(this, 'ShotsTable', {
+		// DynamoDB: Courses, Rounds, Users tables
+		const coursesTable = new dynamodb.Table(this, 'CoursesTable', {
+			partitionKey: { name: 'courseId', type: dynamodb.AttributeType.STRING },
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+		});
+
+		const roundsTable = new dynamodb.Table(this, 'RoundsTable', {
 			partitionKey: { name: 'roundId', type: dynamodb.AttributeType.STRING },
-			sortKey: { name: 'timestamp', type: dynamodb.AttributeType.NUMBER },
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+		});
+
+		const usersTable = new dynamodb.Table(this, 'UsersTable', {
+			partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 			removalPolicy: cdk.RemovalPolicy.RETAIN,
 		});
@@ -34,18 +45,75 @@ export class BackendStack extends cdk.Stack {
 			autoDeleteObjects: false,
 		});
 
-		// Lambda: logShot function
-		const logShotFn = new lambda.Function(this, 'LogShotFunction', {
-			runtime: lambda.Runtime.NODEJS_20_X,
-			handler: 'index.handler',
-			code: lambda.Code.fromAsset('lambda/logShot'),
-			environment: {
-				SHOTS_TABLE: shotsTable.tableName,
-			},
-		});
+		// Helper to create Lambda and grant access
+		const makeLambda = (
+			name: string,
+			codePath: string,
+			env: Record<string, string>,
+			grants: dynamodb.Table[] = [],
+		) => {
+			const fn = new lambda.Function(this, name, {
+				runtime: lambda.Runtime.NODEJS_20_X,
+				handler: 'index.handler',
+				code: lambda.Code.fromAsset(codePath),
+				environment: env,
+			});
+			grants.forEach((t) => t.grantReadWriteData(fn));
+			return new apigateway.LambdaIntegration(fn);
+		};
 
-		// Grant Lambda permission to write to DynamoDB
-		shotsTable.grantWriteData(logShotFn);
+		// Lambda Functions
+		const startRoundIntegration = makeLambda(
+			'StartRoundFunction',
+			'lambda/startRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
+		const updateHoleIntegration = makeLambda(
+			'UpdateHoleFunction',
+			'lambda/updateHole',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
+		const finishRoundIntegration = makeLambda(
+			'FinishRoundFunction',
+			'lambda/finishRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
+		const createCourseIntegration = makeLambda(
+			'CreateCourseFunction',
+			'lambda/createCourse',
+			{ COURSES_TABLE: coursesTable.tableName },
+			[coursesTable],
+		);
+		const listCoursesIntegration = makeLambda(
+			'ListCoursesFunction',
+			'lambda/listCourses',
+			{ COURSES_TABLE: coursesTable.tableName },
+			[coursesTable],
+		);
+		const getCourseIntegration = makeLambda(
+			'GetCourseFunction',
+			'lambda/getCourse',
+			{ COURSES_TABLE: coursesTable.tableName },
+			[coursesTable],
+		);
+		const saveUserIntegration = makeLambda(
+			'SaveUserFunction',
+			'lambda/saveUser',
+			{ USERS_TABLE: usersTable.tableName },
+			[usersTable],
+		);
+		const getUserStatsIntegration = makeLambda(
+			'GetUserStatsFunction',
+			'lambda/getUserStats',
+			{
+				USERS_TABLE: usersTable.tableName,
+				ROUNDS_TABLE: roundsTable.tableName,
+			},
+			[usersTable, roundsTable],
+		);
 
 		// API Gateway
 		this.api = new apigateway.RestApi(this, 'GolfCaddieAPI', {
@@ -53,8 +121,13 @@ export class BackendStack extends cdk.Stack {
 			deployOptions: {
 				stageName: 'prod',
 			},
+			defaultCorsPreflightOptions: {
+				allowOrigins: apigateway.Cors.ALL_ORIGINS,
+				allowMethods: apigateway.Cors.ALL_METHODS,
+			},
 		});
-		this.logShotIntegration = new apigateway.LambdaIntegration(logShotFn);
+
+		const apiRoot = this.api.root.addResource('api').addResource('v1');
 
 		// Cognito: User Pool
 		const userPool = new cognito.UserPool(this, 'GolfCaddieUserPool', {
@@ -83,13 +156,48 @@ export class BackendStack extends cdk.Stack {
 			},
 		);
 
-		// API Gateway: Add POST method to /log-shot with Cognito auth
-		const logShotResource = this.api.root.addResource('log-shot');
-		if (logShotResource) {
-			logShotResource.addMethod('POST', this.logShotIntegration, {
-				authorizationType: apigateway.AuthorizationType.COGNITO,
-				authorizer,
-			});
-		}
+		// API Resources
+		const rounds = apiRoot.addResource('rounds');
+		const roundById = rounds.addResource('{roundId}');
+
+		rounds.addMethod('POST', startRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		const roundHoles = roundById.addResource('holes');
+		roundHoles.addMethod('PUT', updateHoleIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		roundById.addMethod('PATCH', finishRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		const courses = apiRoot.addResource('courses');
+		courses.addMethod('POST', createCourseIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+		courses.addMethod('GET', listCoursesIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+		courses.addResource('{id}').addMethod('GET', getCourseIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		const users = apiRoot.addResource('users');
+		users.addMethod('POST', saveUserIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+		users.addResource('stats').addMethod('GET', getUserStatsIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
 	}
 }
