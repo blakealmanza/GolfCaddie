@@ -11,7 +11,11 @@ export async function handler(event: APIGatewayProxyEvent) {
 		};
 	}
 	const body = JSON.parse(event.body);
-	const { courseId, userId } = body;
+	let { courseId, userId } = body;
+
+	if (courseId === null) {
+		courseId = uuidv4();
+	}
 
 	const roundId = uuidv4();
 	const now = new Date().toISOString();

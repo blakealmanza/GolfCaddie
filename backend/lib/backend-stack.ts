@@ -124,6 +124,7 @@ export class BackendStack extends cdk.Stack {
 			defaultCorsPreflightOptions: {
 				allowOrigins: apigateway.Cors.ALL_ORIGINS,
 				allowMethods: apigateway.Cors.ALL_METHODS,
+				allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
 			},
 		});
 
@@ -159,13 +160,13 @@ export class BackendStack extends cdk.Stack {
 		// API Resources
 		const rounds = apiRoot.addResource('rounds');
 		const roundById = rounds.addResource('{roundId}');
+		const roundHoles = roundById.addResource('holes');
 
 		rounds.addMethod('POST', startRoundIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
 
-		const roundHoles = roundById.addResource('holes');
 		roundHoles.addMethod('PUT', updateHoleIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
@@ -177,6 +178,8 @@ export class BackendStack extends cdk.Stack {
 		});
 
 		const courses = apiRoot.addResource('courses');
+		const courseById = courses.addResource('{id}');
+
 		courses.addMethod('POST', createCourseIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
@@ -185,17 +188,19 @@ export class BackendStack extends cdk.Stack {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
-		courses.addResource('{id}').addMethod('GET', getCourseIntegration, {
+		courseById.addMethod('GET', getCourseIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
 
 		const users = apiRoot.addResource('users');
+		const userStats = users.addResource('stats');
+
 		users.addMethod('POST', saveUserIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
-		users.addResource('stats').addMethod('GET', getUserStatsIntegration, {
+		userStats.addMethod('GET', getUserStatsIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});

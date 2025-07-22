@@ -10,7 +10,7 @@ import StartRoundPage from './pages/StartRoundPage.tsx';
 const cognitoAuthConfig = {
 	authority: import.meta.env.VITE_COGNITO_AUTHORITY,
 	client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
-	redirect_uri: 'https://golfcaddie.dev', // localhost:5173 for dev, golfcaddie.dev for prod
+	redirect_uri: 'http://localhost:5173', // localhost:5173 for dev, golfcaddie.dev for prod
 	response_type: 'code',
 	scope: 'aws.cognito.signin.user.admin email openid',
 };

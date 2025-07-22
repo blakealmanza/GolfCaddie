@@ -1,35 +1,84 @@
-import type { CourseHole, Round } from '@/types';
+import type { Round, RoundHole } from '@/types';
 
-const ROUNDS: Record<string, Round> = {};
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function createRound(
-	courseId: string,
-	holes: CourseHole[],
+	courseId: string | null,
+	accessToken: string,
 ): Promise<Round> {
-	const roundId = `round_${Date.now()}`;
-	const roundHoles = holes.map((hole) => ({
-		tee: hole.tee,
-		pin: hole.pin,
-		par: hole.par,
-		shots: [],
-	}));
+	const response = await fetch(`${API_BASE_URL}/rounds`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({ courseId }),
+	});
 
-	const newRound: Round = {
-		roundId,
-		userId: '123',
-		courseId,
-		holes: roundHoles,
-		startedAt: Date.now(),
-	};
+	if (!response.ok) {
+		throw new Error(`Failed to create round: ${response.statusText}`);
+	}
 
-	ROUNDS[roundId] = newRound;
-	return Promise.resolve(newRound);
+	const data = await response.json();
+	return data as Round;
 }
 
-export async function fetchRoundById(roundId: string): Promise<Round> {
-	const round = ROUNDS[roundId];
-	if (!round) {
-		throw new Error(`Round with ID "${roundId}" not found.`);
+export async function fetchRoundById(
+	roundId: string,
+	accessToken: string,
+): Promise<Round> {
+	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch round: ${response.statusText}`);
 	}
-	return Promise.resolve(round);
+
+	const data = await response.json();
+	// TODO: Convert from DynamoDB format to Round type if needed
+	return data as Round;
+}
+
+export async function updateHoleInRound(
+	roundId: string,
+	holeIndex: number,
+	holeData: RoundHole,
+	accessToken: string,
+): Promise<void> {
+	const response = await fetch(
+		`${API_BASE_URL}/rounds/${roundId}/holes/${holeIndex}`,
+		{
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${accessToken}`,
+			},
+			body: JSON.stringify(holeData),
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error(
+			`Failed to update hole ${holeIndex} in round ${roundId}: ${response.statusText}`,
+		);
+	}
+}
+
+export async function endRound(
+	roundId: string,
+	accessToken: string,
+): Promise<void> {
+	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}/end`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to end round ${roundId}: ${response.statusText}`);
+	}
 }
