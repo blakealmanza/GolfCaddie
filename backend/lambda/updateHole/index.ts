@@ -5,42 +5,42 @@ import {
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { RoundHole } from '../../../frontend/src/types/round';
 import { dynamoClient } from '../shared/dynamoClient';
+import response from '../shared/response';
 
 export async function handler(event: APIGatewayProxyEvent) {
-	if (event.body === null) {
-		return {
-			statusCode: 400,
-			body: JSON.stringify({ message: 'Missing body' }),
+	try {
+		if (event.body === null) {
+			return response(400, { message: 'Missing body' });
+		}
+		if (event.pathParameters === null) {
+			return response(400, { message: 'Missing path parameters' });
+		}
+		const roundId = event.pathParameters.roundId;
+		const holeData = JSON.parse(event.body);
+		const holeIndex = holeData.index; // expected
+
+		const updateExpr = `SET holes[${holeIndex}] = :holeData`;
+		const exprValues: Record<string, AttributeValue> = {
+			':holeData': convertHoleToDynamo(holeData),
 		};
+
+		await dynamoClient.send(
+			new UpdateItemCommand({
+				TableName: process.env.ROUNDS_TABLE,
+				Key: { roundId: { S: roundId } as AttributeValue },
+				UpdateExpression: updateExpr,
+				ExpressionAttributeValues: exprValues,
+			}),
+		);
+
+		return response(200, { message: 'Hole updated' });
+	} catch (error) {
+		console.error('Error updating hole:', error);
+		return response(500, {
+			message: 'Internal server error',
+			error: (error as Error).message,
+		});
 	}
-	if (event.pathParameters === null) {
-		return {
-			statusCode: 400,
-			body: JSON.stringify({ message: 'Missing path parameters' }),
-		};
-	}
-	const roundId = event.pathParameters.roundId;
-	const holeData = JSON.parse(event.body);
-	const holeIndex = holeData.index; // expected
-
-	const updateExpr = `SET holes[${holeIndex}] = :holeData`;
-	const exprValues: Record<string, AttributeValue> = {
-		':holeData': convertHoleToDynamo(holeData),
-	};
-
-	await dynamoClient.send(
-		new UpdateItemCommand({
-			TableName: process.env.ROUNDS_TABLE,
-			Key: { roundId: { S: roundId } as AttributeValue },
-			UpdateExpression: updateExpr,
-			ExpressionAttributeValues: exprValues,
-		}),
-	);
-
-	return {
-		statusCode: 200,
-		body: JSON.stringify({ message: 'Hole updated' }),
-	};
 }
 
 function convertHoleToDynamo(hole: RoundHole): AttributeValue {

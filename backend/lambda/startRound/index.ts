@@ -13,7 +13,7 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const { courseId } = body;
 
 		const roundId = uuidv4();
-		const userId = event.requestContext.authorizer?.claims?.sub || 'unknown';
+		const userId = event.requestContext.authorizer?.claims?.sub;
 		const now = new Date().toISOString();
 
 		const item = {

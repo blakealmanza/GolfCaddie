@@ -37,7 +37,6 @@ export default function StartRoundPage() {
 				type='button'
 				onClick={async () => {
 					if (!idToken) return;
-					console.log(idToken);
 					const round = await createRound('test_course', idToken);
 					navigate(`/round/${round.roundId}`);
 				}}

@@ -3,35 +3,38 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import type { CourseHole } from '../../../frontend/src/types/course';
 import { dynamoClient } from '../shared/dynamoClient';
+import response from '../shared/response';
 
 export async function handler(event: APIGatewayProxyEvent) {
-	if (event.body === null) {
-		return {
-			statusCode: 400,
-			body: JSON.stringify({ message: 'Missing body' }),
+	try {
+		if (event.body === null) {
+			return response(400, { message: 'Missing body' });
+		}
+		const body = JSON.parse(event.body);
+		const userId = event.requestContext.authorizer?.claims?.sub;
+		const courseId = uuidv4();
+
+		const item = {
+			courseId: { S: courseId },
+			name: { S: body.name },
+			holes: { L: (body.holes || []).map(convertHoleToDynamo) },
+			createdBy: { S: userId },
 		};
+
+		await dynamoClient.send(
+			new PutItemCommand({
+				TableName: process.env.COURSES_TABLE,
+				Item: item,
+			}),
+		);
+
+		return response(201, { courseId });
+	} catch (error) {
+		return response(500, {
+			message: 'Internal server error',
+			error: (error as Error).message,
+		});
 	}
-	const body = JSON.parse(event.body);
-	const courseId = uuidv4();
-
-	const item = {
-		courseId: { S: courseId },
-		name: { S: body.name },
-		holes: { L: (body.holes || []).map(convertHoleToDynamo) },
-		createdBy: { S: body.userId || 'unknown' },
-	};
-
-	await dynamoClient.send(
-		new PutItemCommand({
-			TableName: process.env.COURSES_TABLE,
-			Item: item,
-		}),
-	);
-
-	return {
-		statusCode: 201,
-		body: JSON.stringify({ courseId }),
-	};
 }
 
 function convertHoleToDynamo(hole: CourseHole) {
