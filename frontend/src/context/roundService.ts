@@ -25,11 +25,11 @@ export async function createRound(
 
 export async function fetchRoundById(
 	roundId: string,
-	accessToken: string,
+	idToken: string,
 ): Promise<Round> {
 	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}`, {
 		headers: {
-			Authorization: `Bearer ${accessToken}`,
+			Authorization: `Bearer ${idToken}`,
 		},
 	});
 
@@ -46,7 +46,7 @@ export async function updateHoleInRound(
 	roundId: string,
 	holeIndex: number,
 	holeData: RoundHole,
-	accessToken: string,
+	idToken: string,
 ): Promise<void> {
 	const response = await fetch(
 		`${API_BASE_URL}/rounds/${roundId}/holes/${holeIndex}`,
@@ -54,7 +54,7 @@ export async function updateHoleInRound(
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`,
+				Authorization: `Bearer ${idToken}`,
 			},
 			body: JSON.stringify(holeData),
 		},
@@ -69,12 +69,12 @@ export async function updateHoleInRound(
 
 export async function endRound(
 	roundId: string,
-	accessToken: string,
+	idToken: string,
 ): Promise<void> {
 	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}/end`, {
 		method: 'POST',
 		headers: {
-			Authorization: `Bearer ${accessToken}`,
+			Authorization: `Bearer ${idToken}`,
 		},
 	});
 
