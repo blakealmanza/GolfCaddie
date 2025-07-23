@@ -13,18 +13,16 @@ export default function RoundContent() {
 	const idToken = auth.user?.id_token;
 
 	useEffect(() => {
-		if (!roundId) return;
-
-		const loadCourse = async () => {
-			if (!idToken) return;
+		const loadRound = async () => {
+			if (!idToken || !roundId) return;
 			const roundData = await fetchRoundById(roundId, idToken);
 			dispatch({
-				type: 'LOAD_COURSE',
-				payload: { holes: roundData.holes },
+				type: 'INITIALIZE_ROUND',
+				payload: { round: roundData },
 			});
 		};
 
-		loadCourse();
+		loadRound();
 	}, [roundId, dispatch]);
 
 	return (

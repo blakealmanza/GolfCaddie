@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useNavigate } from 'react-router-dom';
+import type { Course } from '@/types';
+import { listCourses } from '../context/courseService';
 import { createRound } from '../context/roundService';
 
 export default function StartRoundPage() {
-	const [courses, setCourses] = useState<{ id: string; name: string }[]>([]);
+	const [courses, setCourses] = useState<Course[]>([]);
 	const navigate = useNavigate();
 
 	const auth = useAuth();
 	const idToken = auth.user?.id_token;
 
 	useEffect(() => {
-		// Simulate loading courses
-		setCourses([{ id: '123', name: 'Test Course' }]);
+		const loadCourses = async () => {
+			if (!idToken) return;
+			const courses = await listCourses(idToken);
+			setCourses(courses);
+		};
+		loadCourses();
 	}, []);
 
 	const handleStartRound = async (courseId: string) => {
@@ -26,8 +32,11 @@ export default function StartRoundPage() {
 			<h1>Start a New Round</h1>
 			<ul>
 				{courses.map((course) => (
-					<li key={course.id}>
-						<button type='button' onClick={() => handleStartRound(course.id)}>
+					<li key={course.courseId}>
+						<button
+							type='button'
+							onClick={() => handleStartRound(course.courseId)}
+						>
 							Play {course.name}
 						</button>
 					</li>
@@ -37,7 +46,7 @@ export default function StartRoundPage() {
 				type='button'
 				onClick={async () => {
 					if (!idToken) return;
-					const round = await createRound('test_course', idToken);
+					const round = await createRound(null, idToken);
 					navigate(`/round/${round.roundId}`);
 				}}
 			>

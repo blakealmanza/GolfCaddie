@@ -28,7 +28,9 @@ export async function fetchRoundById(
 	idToken: string,
 ): Promise<Round> {
 	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}`, {
+		method: 'GET',
 		headers: {
+			'Content-Type': 'application/json',
 			Authorization: `Bearer ${idToken}`,
 		},
 	});

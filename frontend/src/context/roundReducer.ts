@@ -1,4 +1,4 @@
-import type { CourseHole, RoundHole, SelectingMode, Shot } from '@/types';
+import type { Round, RoundHole, SelectingMode, Shot } from '@/types';
 import type { LatLng } from '../util/geoUtils';
 import { holeReducer } from './holeReducer';
 
@@ -19,9 +19,9 @@ export type RoundAction =
 	| { type: 'PREVIOUS_HOLE' }
 	| { type: 'SET_PAR'; payload: number }
 	| {
-			type: 'LOAD_COURSE';
+			type: 'INITIALIZE_ROUND';
 			payload: {
-				holes: CourseHole[];
+				round: Round;
 			};
 	  };
 
@@ -43,19 +43,13 @@ export function roundReducer(
 	action: RoundAction,
 ): RoundState {
 	switch (action.type) {
-		case 'LOAD_COURSE': {
-			const holes = action.payload.holes.map((hole) => ({
-				tee: hole.tee,
-				pin: hole.pin,
-				par: hole.par,
-				shots: [] as Shot[],
-			}));
+		case 'INITIALIZE_ROUND': {
+			const initialRoundHoles = action.payload.round.holes;
 			return {
 				...state,
-				holes,
+				holes: initialRoundHoles,
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
-				// selectingMode: holes[0].tee && holes[0].pin ? 'target' : 'tee',
 			};
 		}
 
