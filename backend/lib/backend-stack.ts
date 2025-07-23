@@ -3,6 +3,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import type { Construct } from 'constructs';
 
@@ -52,11 +53,15 @@ export class BackendStack extends cdk.Stack {
 			env: Record<string, string>,
 			grants: dynamodb.Table[] = [],
 		) => {
-			const fn = new lambda.Function(this, name, {
+			const fn = new NodejsFunction(this, name, {
+				entry: `${codePath}/index.ts`,
+				handler: 'handler',
 				runtime: lambda.Runtime.NODEJS_20_X,
-				handler: 'index.handler',
-				code: lambda.Code.fromAsset(codePath),
 				environment: env,
+				bundling: {
+					externalModules: [],
+					nodeModules: ['@aws-sdk/client-dynamodb', 'uuid'],
+				},
 			});
 			grants.forEach((t) => t.grantReadWriteData(fn));
 			return new apigateway.LambdaIntegration(fn);

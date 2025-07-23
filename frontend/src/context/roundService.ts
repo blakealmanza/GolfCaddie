@@ -4,19 +4,19 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function createRound(
 	courseId: string | null,
-	accessToken: string,
+	idToken: string,
 ): Promise<Round> {
 	const response = await fetch(`${API_BASE_URL}/rounds`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${accessToken}`,
+			Authorization: `Bearer ${idToken}`,
 		},
 		body: JSON.stringify({ courseId }),
 	});
 
 	if (!response.ok) {
-		throw new Error(`Failed to create round: ${response.statusText}`);
+		throw new Error(`Failed to create round: ${response}`);
 	}
 
 	const data = await response.json();

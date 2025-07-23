@@ -8,7 +8,7 @@ export default function StartRoundPage() {
 	const navigate = useNavigate();
 
 	const auth = useAuth();
-	const accessToken = auth.user?.access_token;
+	const idToken = auth.user?.id_token;
 
 	useEffect(() => {
 		// Simulate loading courses
@@ -16,8 +16,8 @@ export default function StartRoundPage() {
 	}, []);
 
 	const handleStartRound = async (courseId: string) => {
-		if (!accessToken) return;
-		const round = await createRound(courseId, accessToken);
+		if (!idToken) return;
+		const round = await createRound(courseId, idToken);
 		navigate(`/round/${round.roundId}`);
 	};
 
@@ -36,8 +36,9 @@ export default function StartRoundPage() {
 			<button
 				type='button'
 				onClick={async () => {
-					if (!accessToken) return;
-					const round = await createRound(null, accessToken);
+					if (!idToken) return;
+					console.log(idToken);
+					const round = await createRound('test_course', idToken);
 					navigate(`/round/${round.roundId}`);
 				}}
 			>
