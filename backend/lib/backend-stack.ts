@@ -71,8 +71,11 @@ export class BackendStack extends cdk.Stack {
 		const startRoundIntegration = makeLambda(
 			'StartRoundFunction',
 			'lambda/startRound',
-			{ ROUNDS_TABLE: roundsTable.tableName },
-			[roundsTable],
+			{
+				ROUNDS_TABLE: roundsTable.tableName,
+				COURSES_TABLE: coursesTable.tableName,
+			},
+			[roundsTable, coursesTable],
 		);
 		const updateHoleIntegration = makeLambda(
 			'UpdateHoleFunction',
