@@ -97,7 +97,7 @@ export async function updateHoleInRound(
 	const response = await fetch(
 		`${API_BASE_URL}/rounds/${roundId}/holes/${holeIndex}`,
 		{
-			method: 'PUT',
+			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${idToken}`,
