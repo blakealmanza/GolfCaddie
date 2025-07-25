@@ -1,4 +1,4 @@
-import type { Course } from '@shared/types';
+import type { Course, CourseHole } from '@shared/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -55,5 +55,35 @@ export async function listCourses(idToken: string): Promise<Course[]> {
 	}
 
 	const data = await response.json();
-	return data.courses;
+	const parsedCourses = data.courses.map((item: any) =>
+		parseDynamoCourse(item),
+	);
+	return parsedCourses;
+}
+
+export function parseDynamoCourse(item: any): Course {
+	return {
+		courseId: item.courseId.S,
+		name: item.name.S,
+		createdBy: item.createdBy.S,
+		createdAt: '',
+		holes:
+			item.holes?.L.map(
+				(hole: any): CourseHole => ({
+					tee: hole.M.tee.NULL
+						? null
+						: {
+								lat: parseFloat(hole.M.tee.M.lat.N),
+								lng: parseFloat(hole.M.tee.M.lng.N),
+							},
+					pin: hole.M.pin.NULL
+						? null
+						: {
+								lat: parseFloat(hole.M.pin.M.lat.N),
+								lng: parseFloat(hole.M.pin.M.lng.N),
+							},
+					par: parseInt(hole.M.par.N),
+				}),
+			) ?? [],
+	};
 }
