@@ -1,4 +1,6 @@
 import type { SelectingMode } from '@shared/types';
+import { useAuth } from 'react-oidc-context';
+import { updateHoleInRound } from '@/context/roundService';
 import { useRound } from '../../context/RoundContext';
 
 export default function HoleInfoPanel({
@@ -9,9 +11,25 @@ export default function HoleInfoPanel({
 	setSelectingMode: (mode: SelectingMode) => void;
 }) {
 	const { state, dispatch } = useRound();
-	const { currentHoleIndex, selectedHoleIndex, holes } = state;
+	const { currentHoleIndex, selectedHoleIndex, holes, roundId } = state;
+	const auth = useAuth();
+	const idToken = auth.user?.id_token;
 
-	const nextHole = () => {
+	const selectedCourseHole = holes[selectedHoleIndex];
+
+	const nextHole = async () => {
+		try {
+			if (!idToken || !roundId) return;
+			await updateHoleInRound(
+				roundId,
+				selectedHoleIndex,
+				selectedCourseHole,
+				idToken,
+			);
+		} catch (error) {
+			console.error('Failed to save hole:', error);
+		}
+
 		dispatch({ type: 'NEXT_HOLE' });
 		setSelectingMode('tee');
 	};
@@ -20,15 +38,12 @@ export default function HoleInfoPanel({
 		dispatch({ type: 'PREVIOUS_HOLE' });
 	};
 
-	const selectedCourseHole = holes[selectedHoleIndex];
-	// const selectedRoundHole = roundShots[selectedHoleIndex];
-
-	const handleParChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		dispatch({
-			type: 'SET_PAR',
-			payload: parseInt(e.target.value, 10),
-		});
-	};
+	// const handleParChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	// 	dispatch({
+	// 		type: 'SET_PAR',
+	// 		payload: parseInt(e.target.value, 10),
+	// 	});
+	// };
 
 	return (
 		<div
@@ -53,21 +68,7 @@ export default function HoleInfoPanel({
 			</button>
 			<p>Selected Hole: {selectedHoleIndex + 1}</p>
 			<p>Current Hole: {currentHoleIndex + 1}</p>
-
-			{selectedCourseHole?.tee &&
-				selectedCourseHole?.pin &&
-				selectedCourseHole?.par === 0 && (
-					<div>
-						<label htmlFor='par-input'>Set Par:</label>
-						<input
-							id='par-input'
-							type='number'
-							min={3}
-							max={6}
-							onChange={handleParChange}
-						/>
-					</div>
-				)}
+			<p>Par: {selectedCourseHole?.par}</p>
 		</div>
 	);
 }
