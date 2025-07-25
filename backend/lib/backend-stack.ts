@@ -86,6 +86,12 @@ export class BackendStack extends cdk.Stack {
 			{ ROUNDS_TABLE: roundsTable.tableName },
 			[roundsTable],
 		);
+		const getRoundIntegration = makeLambda(
+			'GetRoundFunction',
+			'lambda/getRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
 		const createCourseIntegration = makeLambda(
 			'CreateCourseFunction',
 			'lambda/createCourse',
@@ -178,6 +184,10 @@ export class BackendStack extends cdk.Stack {
 		});
 
 		roundById.addMethod('PATCH', finishRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+		roundById.addMethod('GET', getRoundIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
