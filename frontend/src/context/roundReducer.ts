@@ -3,6 +3,7 @@ import type { LatLng } from '../util/geoUtils';
 import { holeReducer } from './holeReducer';
 
 export interface RoundState {
+	roundId: string;
 	holes: RoundHole[];
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
@@ -26,6 +27,7 @@ export type RoundAction =
 	  };
 
 export const initialRoundState: RoundState = {
+	roundId: '',
 	holes: [
 		{
 			tee: null,
@@ -45,8 +47,10 @@ export function roundReducer(
 	switch (action.type) {
 		case 'INITIALIZE_ROUND': {
 			const initialRoundHoles = action.payload.round.holes;
+			const roundId = action.payload.round.roundId;
 			return {
 				...state,
+				roundId,
 				holes: initialRoundHoles,
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
