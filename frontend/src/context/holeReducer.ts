@@ -1,4 +1,4 @@
-import type { LatLng, RoundHole, Shot } from '@/types';
+import type { LatLng, RoundHole, Shot } from '@shared/types';
 
 type HoleAction =
 	| { type: 'SET_TEE'; payload: LatLng }

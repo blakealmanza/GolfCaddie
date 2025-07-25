@@ -1,4 +1,4 @@
-import type { SelectingMode } from '@/types';
+import type { SelectingMode } from '@shared/types';
 import { useRound } from '../../context/RoundContext';
 
 export default function HoleInfoPanel({

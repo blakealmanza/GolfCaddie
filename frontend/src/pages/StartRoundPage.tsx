@@ -1,7 +1,7 @@
+import type { Course } from '@shared/types';
 import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useNavigate } from 'react-router-dom';
-import type { Course } from '@/types';
 import { listCourses } from '../context/courseService';
 import { createRound } from '../context/roundService';
 

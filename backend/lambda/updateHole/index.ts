@@ -2,8 +2,8 @@ import {
 	type AttributeValue,
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import type { RoundHole } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import type { RoundHole } from '../../../frontend/src/types/round';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
 

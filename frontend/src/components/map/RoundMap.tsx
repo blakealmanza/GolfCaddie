@@ -1,3 +1,10 @@
+import type {
+	LatLng,
+	RoundHole,
+	SelectingMode,
+	Shot,
+	ShotSuggestion,
+} from '@shared/types';
 import {
 	APIProvider,
 	Map as GoogleMap,
@@ -5,13 +12,6 @@ import {
 	Marker,
 } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
-import type {
-	LatLng,
-	RoundHole,
-	SelectingMode,
-	Shot,
-	ShotSuggestion,
-} from '@/types';
 import { useRound } from '../../context/RoundContext';
 import { getDistance } from '../../util/geoUtils';
 import { suggestClub } from '../../util/suggestClub';

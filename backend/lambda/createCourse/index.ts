@@ -1,7 +1,7 @@
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import type { CourseHole } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
-import type { CourseHole } from '../../../frontend/src/types/course';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
 

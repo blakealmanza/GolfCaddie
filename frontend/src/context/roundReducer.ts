@@ -1,4 +1,4 @@
-import type { Round, RoundHole, SelectingMode, Shot } from '@/types';
+import type { Round, RoundHole, SelectingMode, Shot } from '@shared/types';
 import type { LatLng } from '../util/geoUtils';
 import { holeReducer } from './holeReducer';
 
