@@ -16,8 +16,8 @@ export async function handler(event: APIGatewayProxyEvent) {
 			return response(400, { message: 'Missing path parameters' });
 		}
 		const roundId = event.pathParameters.roundId;
+		const holeIndex = event.pathParameters.holeIndex;
 		const holeData = JSON.parse(event.body);
-		const holeIndex = holeData.index; // expected
 
 		const updateExpr = `SET holes[${holeIndex}] = :holeData`;
 		const exprValues: Record<string, AttributeValue> = {

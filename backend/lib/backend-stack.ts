@@ -175,13 +175,14 @@ export class BackendStack extends cdk.Stack {
 		const rounds = apiRoot.addResource('rounds');
 		const roundById = rounds.addResource('{roundId}');
 		const roundHoles = roundById.addResource('holes');
+		const roundHoleById = roundHoles.addResource('{holeIndex}');
 
 		rounds.addMethod('POST', startRoundIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
 
-		roundHoles.addMethod('PUT', updateHoleIntegration, {
+		roundHoleById.addMethod('PATCH', updateHoleIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
