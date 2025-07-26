@@ -26,15 +26,10 @@ export default function RoundContent() {
 	}, [roundId, dispatch]);
 
 	return (
-		<>
-			<RoundMap>
-				{({ addShot, setSelectingMode }) => (
-					<HoleInfoPanel
-						addShot={addShot}
-						setSelectingMode={setSelectingMode}
-					/>
-				)}
-			</RoundMap>
-		</>
+		<RoundMap>
+			{({ addShot, setSelectingMode }) => (
+				<HoleInfoPanel addShot={addShot} setSelectingMode={setSelectingMode} />
+			)}
+		</RoundMap>
 	);
 }

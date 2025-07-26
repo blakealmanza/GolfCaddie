@@ -1,4 +1,4 @@
-import { ScanCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
@@ -7,12 +7,14 @@ export async function handler(event: APIGatewayProxyEvent) {
 	try {
 		const userId = event.requestContext.authorizer?.claims?.sub;
 
-		const result = await dynamoClient.send(
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		const result = await docClient.send(
 			new ScanCommand({
 				TableName: process.env.ROUNDS_TABLE,
 				FilterExpression: 'userId = :u',
 				ExpressionAttributeValues: {
-					':u': { S: userId },
+					':u': userId,
 				},
 			}),
 		);

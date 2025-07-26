@@ -1,5 +1,5 @@
-import { PutItemCommand } from '@aws-sdk/client-dynamodb';
-import type { CourseHole } from '@shared/types';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import type { Course } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamoClient } from '../shared/dynamoClient';
@@ -14,15 +14,18 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const userId = event.requestContext.authorizer?.claims?.sub;
 		const courseId = uuidv4();
 
-		const item = {
-			courseId: { S: courseId },
-			name: { S: body.name },
-			holes: { L: (body.holes || []).map(convertHoleToDynamo) },
-			createdBy: { S: userId },
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		const item: Course = {
+			courseId,
+			name: body.name,
+			holes: body.holes || [],
+			createdBy: userId,
+			createdAt: new Date().toISOString(),
 		};
 
-		await dynamoClient.send(
-			new PutItemCommand({
+		await docClient.send(
+			new PutCommand({
 				TableName: process.env.COURSES_TABLE,
 				Item: item,
 			}),
@@ -35,28 +38,4 @@ export async function handler(event: APIGatewayProxyEvent) {
 			error: (error as Error).message,
 		});
 	}
-}
-
-function convertHoleToDynamo(hole: CourseHole) {
-	return {
-		M: {
-			tee: hole.tee
-				? {
-						M: {
-							lat: { N: hole.tee.lat.toString() },
-							lng: { N: hole.tee.lng.toString() },
-						},
-					}
-				: { NULL: true },
-			pin: hole.pin
-				? {
-						M: {
-							lat: { N: hole.pin.lat.toString() },
-							lng: { N: hole.pin.lng.toString() },
-						},
-					}
-				: { NULL: true },
-			par: { N: hole.par.toString() },
-		},
-	};
 }

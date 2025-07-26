@@ -1,4 +1,5 @@
-import { type AttributeValue, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import type { Course } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
@@ -10,18 +11,22 @@ export async function handler(event: APIGatewayProxyEvent) {
 		}
 		const courseId = event.pathParameters.id;
 
-		const result = await dynamoClient.send(
-			new GetItemCommand({
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		const result = await docClient.send(
+			new GetCommand({
 				TableName: process.env.COURSES_TABLE,
-				Key: { courseId: { S: courseId } as AttributeValue },
+				Key: { courseId },
 			}),
 		);
 
-		if (!result.Item) {
+		const course = result.Item as Course | undefined;
+
+		if (!course) {
 			return response(404, { message: 'Course not found' });
 		}
 
-		return response(200, { course: result.Item });
+		return response(200, { course });
 	} catch (error) {
 		console.error('Error fetching course:', error);
 		return response(500, {

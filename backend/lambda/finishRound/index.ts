@@ -1,7 +1,4 @@
-import {
-	type AttributeValue,
-	UpdateItemCommand,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
@@ -14,15 +11,17 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const roundId = event.pathParameters.roundId;
 		const now = new Date().toISOString();
 
-		await dynamoClient.send(
-			new UpdateItemCommand({
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		await docClient.send(
+			new UpdateCommand({
 				TableName: process.env.ROUNDS_TABLE,
-				Key: { roundId: { S: roundId } as AttributeValue },
+				Key: { roundId },
 				UpdateExpression: 'SET #status = :status, finishedAt = :finishedAt',
 				ExpressionAttributeNames: { '#status': 'status' },
 				ExpressionAttributeValues: {
-					':status': { S: 'COMPLETED' },
-					':finishedAt': { S: now },
+					':status': 'COMPLETED',
+					':finishedAt': now,
 				},
 			}),
 		);

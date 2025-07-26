@@ -1,4 +1,4 @@
-import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
@@ -12,15 +12,17 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const { email, name } = body;
 		const userId = event.requestContext.authorizer?.claims?.sub;
 
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
 		const item = {
-			userId: { S: userId },
-			email: { S: email },
-			name: { S: name || 'Anonymous' },
-			updatedAt: { S: new Date().toISOString() },
+			userId,
+			email,
+			name: name || 'Anonymous',
+			updatedAt: new Date().toISOString(),
 		};
 
-		await dynamoClient.send(
-			new PutItemCommand({
+		await docClient.send(
+			new PutCommand({
 				TableName: process.env.USERS_TABLE,
 				Item: item,
 			}),

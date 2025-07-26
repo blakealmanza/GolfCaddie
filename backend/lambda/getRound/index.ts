@@ -1,4 +1,5 @@
-import { GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { Round } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
@@ -11,21 +12,25 @@ export async function handler(event: APIGatewayProxyEvent) {
 			return response(400, { message: 'Missing roundId in path' });
 		}
 
-		const result = await dynamoClient.send(
-			new GetItemCommand({
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		const result = await docClient.send(
+			new GetCommand({
 				TableName: process.env.ROUNDS_TABLE,
 				Key: {
-					roundId: { S: roundId },
+					roundId,
 				},
 			}),
 		);
 
-		if (!result.Item) {
+		const round = result.Item as Round | undefined;
+
+		if (!round) {
 			return response(404, { message: 'Round not found' });
 		}
 
 		return response(200, {
-			round: result.Item,
+			round,
 		});
 	} catch (error) {
 		console.error('Error fetching round:', error);

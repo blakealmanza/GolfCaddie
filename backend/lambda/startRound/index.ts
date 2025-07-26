@@ -1,16 +1,19 @@
-import { GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import {
+	DynamoDBDocumentClient,
+	GetCommand,
+	PutCommand,
+} from '@aws-sdk/lib-dynamodb';
+import type { Course, CourseHole, RoundHole } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
 
-const generateEmptyHole = () => ({
-	M: {
-		tee: { NULL: true },
-		pin: { NULL: true },
-		par: { N: '0' },
-		shots: { L: [] },
-	},
+const generateEmptyHole = (): RoundHole => ({
+	tee: null,
+	pin: null,
+	par: 0,
+	shots: [],
 });
 
 export async function handler(event: APIGatewayProxyEvent) {
@@ -26,44 +29,42 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const userId = event.requestContext.authorizer?.claims?.sub;
 		const now = new Date().toISOString();
 
-		let holes: { L: any[] } = {
-			L: Array.from({ length: 18 }, generateEmptyHole),
-		};
+		const docClient = DynamoDBDocumentClient.from(dynamoClient);
+
+		let holes = Array.from({ length: 18 }, generateEmptyHole);
 
 		if (courseId) {
-			const courseData = await dynamoClient.send(
-				new GetItemCommand({
+			const result = await docClient.send(
+				new GetCommand({
 					TableName: process.env.COURSES_TABLE,
-					Key: { courseId: { S: courseId } },
+					Key: { courseId },
 				}),
 			);
 
-			const courseHoles = courseData.Item?.holes?.L;
+			const courseData = result.Item as Course | undefined;
+
+			const courseHoles = courseData?.holes;
 			if (courseHoles) {
-				holes = {
-					L: courseHoles.map((hole) => ({
-						M: {
-							tee: hole.M?.tee ?? { NULL: true },
-							pin: hole.M?.pin ?? { NULL: true },
-							par: hole.M?.par ?? { N: '0' },
-							shots: { L: [] },
-						},
-					})),
-				};
+				holes = courseHoles.map((hole: CourseHole) => ({
+					tee: hole.tee ?? null,
+					pin: hole.pin ?? null,
+					par: hole.par ?? 0,
+					shots: [],
+				}));
 			}
 		}
 
-		const item: Record<string, any> = {
-			roundId: { S: roundId },
-			userId: { S: userId },
-			startedAt: { S: now },
-			status: { S: 'IN_PROGRESS' },
-			courseId: courseId ? { S: courseId } : { NULL: true },
+		const item = {
+			roundId,
+			userId,
+			startedAt: now,
+			status: 'IN_PROGRESS',
+			courseId: courseId ?? null,
 			holes,
 		};
 
-		await dynamoClient.send(
-			new PutItemCommand({
+		await docClient.send(
+			new PutCommand({
 				TableName: process.env.ROUNDS_TABLE,
 				Item: item,
 			}),
