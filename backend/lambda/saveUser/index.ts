@@ -21,19 +21,29 @@ export async function handler(event: APIGatewayProxyEvent) {
 			updatedAt: new Date().toISOString(),
 		};
 
-		await docClient.send(
-			new PutCommand({
-				TableName: process.env.USERS_TABLE,
-				Item: item,
-			}),
-		);
+		try {
+			await docClient.send(
+				new PutCommand({
+					TableName: process.env.USERS_TABLE,
+					Item: item,
+				}),
+			);
 
-		return response(200, { message: 'User saved' });
+			return response(200, { message: 'User saved' });
+		} catch (sendError) {
+			console.error('Error saving user to DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to save user',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
+		}
 	} catch (error) {
 		console.error('Error saving user:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to save user',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}
 }

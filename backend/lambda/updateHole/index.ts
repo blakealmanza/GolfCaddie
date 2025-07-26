@@ -19,23 +19,33 @@ export async function handler(event: APIGatewayProxyEvent) {
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-		await docClient.send(
-			new UpdateCommand({
-				TableName: process.env.ROUNDS_TABLE,
-				Key: { roundId },
-				UpdateExpression: `SET holes[${holeIndex}] = :holeData`,
-				ExpressionAttributeValues: {
-					':holeData': holeData,
-				},
-			}),
-		);
+		try {
+			await docClient.send(
+				new UpdateCommand({
+					TableName: process.env.ROUNDS_TABLE,
+					Key: { roundId },
+					UpdateExpression: `SET holes[${holeIndex}] = :holeData`,
+					ExpressionAttributeValues: {
+						':holeData': holeData,
+					},
+				}),
+			);
 
-		return response(200, { message: 'Hole updated' });
+			return response(200, { message: 'Hole updated' });
+		} catch (sendError) {
+			console.error('Error updating hole in DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to update hole',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
+		}
 	} catch (error) {
 		console.error('Error updating hole:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to update hole',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}
 }

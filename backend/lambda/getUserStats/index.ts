@@ -9,25 +9,35 @@ export async function handler(event: APIGatewayProxyEvent) {
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-		const result = await docClient.send(
-			new ScanCommand({
-				TableName: process.env.ROUNDS_TABLE,
-				FilterExpression: 'userId = :u',
-				ExpressionAttributeValues: {
-					':u': userId,
-				},
-			}),
-		);
+		try {
+			const result = await docClient.send(
+				new ScanCommand({
+					TableName: process.env.ROUNDS_TABLE,
+					FilterExpression: 'userId = :u',
+					ExpressionAttributeValues: {
+						':u': userId,
+					},
+				}),
+			);
 
-		const rounds = result.Items || [];
-		const totalRounds = rounds.length;
+			const rounds = result.Items || [];
+			const totalRounds = rounds.length;
 
-		return response(200, { totalRounds });
+			return response(200, { totalRounds });
+		} catch (sendError) {
+			console.error('Error fetching user stats from DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to fetch user stats',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
+		}
 	} catch (error) {
 		console.error('Error fetching user stats:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to fetch user stats',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}
 }

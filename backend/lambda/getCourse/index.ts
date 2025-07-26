@@ -13,25 +13,35 @@ export async function handler(event: APIGatewayProxyEvent) {
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-		const result = await docClient.send(
-			new GetCommand({
-				TableName: process.env.COURSES_TABLE,
-				Key: { courseId },
-			}),
-		);
+		try {
+			const result = await docClient.send(
+				new GetCommand({
+					TableName: process.env.COURSES_TABLE,
+					Key: { courseId },
+				}),
+			);
 
-		const course = result.Item as Course | undefined;
+			const course = result.Item as Course | undefined;
 
-		if (!course) {
-			return response(404, { message: 'Course not found' });
+			if (!course) {
+				return response(404, { message: 'Course not found' });
+			}
+
+			return response(200, { course });
+		} catch (sendError) {
+			console.error('Error fetching course from DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to fetch course',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
 		}
-
-		return response(200, { course });
 	} catch (error) {
 		console.error('Error fetching course:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to fetch course',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}
 }

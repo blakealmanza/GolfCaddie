@@ -24,18 +24,32 @@ export async function handler(event: APIGatewayProxyEvent) {
 			createdAt: new Date().toISOString(),
 		};
 
-		await docClient.send(
-			new PutCommand({
-				TableName: process.env.COURSES_TABLE,
-				Item: item,
-			}),
-		);
+		try {
+			await docClient.send(
+				new PutCommand({
+					TableName: process.env.COURSES_TABLE,
+					Item: item,
+				}),
+			);
+		} catch (sendError) {
+			console.error('Error saving course to DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to save course to DynamoDB',
+				error:
+					sendError instanceof Error
+						? sendError.message
+						: 'Unknown DynamoDB error occurred',
+			});
+		}
 
 		return response(201, { courseId });
 	} catch (error) {
+		console.error('Error creating course:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to create course',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}
 }

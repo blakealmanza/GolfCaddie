@@ -63,16 +63,29 @@ export async function handler(event: APIGatewayProxyEvent) {
 			holes,
 		};
 
-		await docClient.send(
-			new PutCommand({
-				TableName: process.env.ROUNDS_TABLE,
-				Item: item,
-			}),
-		);
+		try {
+			await docClient.send(
+				new PutCommand({
+					TableName: process.env.ROUNDS_TABLE,
+					Item: item,
+				}),
+			);
 
-		return response(201, { roundId });
+			return response(201, { roundId });
+		} catch (sendError) {
+			console.error('Error saving round to DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to save round',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
+		}
 	} catch (error) {
 		console.error('Error starting round:', error);
-		return response(500, { message: 'Internal server error' });
+
+		return response(500, {
+			message: 'Failed to start round',
+			error: error instanceof Error ? error.message : 'Unknown error occurred',
+		});
 	}
 }

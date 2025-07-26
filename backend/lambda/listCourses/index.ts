@@ -7,26 +7,36 @@ export async function handler() {
 	try {
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-		const result = await docClient.send(
-			new ScanCommand({
-				TableName: process.env.COURSES_TABLE,
-			}),
-		);
+		try {
+			const result = await docClient.send(
+				new ScanCommand({
+					TableName: process.env.COURSES_TABLE,
+				}),
+			);
 
-		const courses = (result.Items as Course[]) || undefined;
+			const courses = (result.Items as Course[]) || undefined;
 
-		if (!courses) {
-			return response(404, { message: 'Courses not found' });
+			if (!courses) {
+				return response(404, { message: 'Courses not found' });
+			}
+
+			return response(200, {
+				courses,
+			});
+		} catch (sendError) {
+			console.error('Error fetching courses from DynamoDB:', sendError);
+
+			return response(500, {
+				message: 'Failed to fetch courses',
+				error: sendError instanceof Error ? sendError.message : 'Unknown error',
+			});
 		}
-
-		return response(200, {
-			courses,
-		});
 	} catch (error) {
 		console.error('Error listing courses:', error);
+
 		return response(500, {
-			message: 'Internal server error',
-			error: (error as Error).message,
+			message: 'Failed to list courses',
+			error: error instanceof Error ? error.message : 'Unknown error',
 		});
 	}
 }
