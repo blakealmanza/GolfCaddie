@@ -1,7 +1,7 @@
 import type { Course } from '@shared/types';
 import { useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { useNavigate } from 'react-router-dom';
+import { useCustomAuth } from '@/context/AuthContext';
 import { listCourses } from '../context/courseService';
 import { createRound } from '../context/roundService';
 
@@ -9,8 +9,8 @@ export default function StartRoundPage() {
 	const [courses, setCourses] = useState<Course[]>([]);
 	const navigate = useNavigate();
 
-	const auth = useAuth();
-	const idToken = auth.user?.id_token;
+	const auth = useCustomAuth();
+	const idToken = auth.idToken;
 
 	useEffect(() => {
 		const loadCourses = async () => {

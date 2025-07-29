@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import AppLayout from './layouts/AppLayout.tsx';
+import { AuthWrapper } from './context/AuthContext.tsx';
 import HomePage from './pages/HomePage.tsx';
 import RoundPage from './pages/RoundPage.tsx';
 import StartRoundPage from './pages/StartRoundPage.tsx';
@@ -19,15 +19,9 @@ const cognitoAuthConfig = {
 };
 
 const router = createBrowserRouter([
-	{
-		path: '/',
-		element: <AppLayout />,
-		children: [
-			{ index: true, element: <HomePage /> },
-			{ path: 'start', element: <StartRoundPage /> },
-			{ path: 'round/:roundId', element: <RoundPage /> },
-		],
-	},
+	{ path: '/', element: <HomePage /> },
+	{ path: 'start', element: <StartRoundPage /> },
+	{ path: 'round/:roundId', element: <RoundPage /> },
 ]);
 
 const rootElement = document.getElementById('root');
@@ -36,7 +30,9 @@ if (rootElement) {
 	createRoot(rootElement).render(
 		// <React.StrictMode>
 		<AuthProvider {...cognitoAuthConfig}>
-			<RouterProvider router={router} />
+			<AuthWrapper>
+				<RouterProvider router={router} />
+			</AuthWrapper>
 		</AuthProvider>,
 		// </React.StrictMode>
 	);

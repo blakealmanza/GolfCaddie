@@ -1,5 +1,5 @@
 import type { SelectingMode } from '@shared/types';
-import { useAuth } from 'react-oidc-context';
+import { useCustomAuth } from '@/context/AuthContext';
 import { updateHoleInRound } from '@/context/roundService';
 import { useRound } from '../../context/RoundContext';
 
@@ -12,8 +12,8 @@ export default function HoleInfoPanel({
 }) {
 	const { state, dispatch } = useRound();
 	const { currentHoleIndex, selectedHoleIndex, holes, roundId } = state;
-	const auth = useAuth();
-	const idToken = auth.user?.id_token;
+	const auth = useCustomAuth();
+	const idToken = auth.idToken;
 
 	const selectedCourseHole = holes[selectedHoleIndex];
 
