@@ -3,9 +3,11 @@ import './index.css';
 import { AuthProvider } from 'react-oidc-context';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthWrapper } from './context/AuthContext.tsx';
+import CoursePreviewPage from './pages/CoursePreviewPage.tsx';
+import CoursesPage from './pages/CoursesPage.tsx';
 import HomePage from './pages/HomePage.tsx';
 import RoundPage from './pages/RoundPage.tsx';
-import StartRoundPage from './pages/StartRoundPage.tsx';
+import StatsPage from './pages/StatsPage.tsx';
 
 const cognitoAuthConfig = {
 	authority: import.meta.env.VITE_COGNITO_AUTHORITY,
@@ -20,8 +22,10 @@ const cognitoAuthConfig = {
 
 const router = createBrowserRouter([
 	{ path: '/', element: <HomePage /> },
-	{ path: 'start', element: <StartRoundPage /> },
-	{ path: 'round/:roundId', element: <RoundPage /> },
+	{ path: '/courses', element: <CoursesPage /> },
+	{ path: '/courses/:id', element: <CoursePreviewPage /> },
+	{ path: '/stats', element: <StatsPage /> },
+	{ path: 'round/:id', element: <RoundPage /> },
 ]);
 
 const rootElement = document.getElementById('root');
