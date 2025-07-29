@@ -7,15 +7,14 @@ import { useCustomAuth } from './AuthContext';
 import { fetchRoundById } from './roundService';
 
 export default function RoundContent() {
-	const { roundId } = useParams();
+	const { id } = useParams();
 	const { dispatch } = useRound();
-	const auth = useCustomAuth();
-	const idToken = auth.idToken;
+	const { idToken } = useCustomAuth();
 
 	useEffect(() => {
 		const loadRound = async () => {
-			if (!idToken || !roundId) return;
-			const roundData = await fetchRoundById(roundId, idToken);
+			if (!idToken || !id) return;
+			const roundData = await fetchRoundById(id, idToken);
 			dispatch({
 				type: 'INITIALIZE_ROUND',
 				payload: { round: roundData },
@@ -23,7 +22,7 @@ export default function RoundContent() {
 		};
 
 		loadRound();
-	}, [roundId, dispatch]);
+	}, [id, dispatch]);
 
 	return (
 		<RoundMap>

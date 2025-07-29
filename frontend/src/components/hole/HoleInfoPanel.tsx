@@ -12,8 +12,7 @@ export default function HoleInfoPanel({
 }) {
 	const { state, dispatch } = useRound();
 	const { currentHoleIndex, selectedHoleIndex, holes, roundId } = state;
-	const auth = useCustomAuth();
-	const idToken = auth.idToken;
+	const { idToken } = useCustomAuth();
 
 	const selectedCourseHole = holes[selectedHoleIndex];
 

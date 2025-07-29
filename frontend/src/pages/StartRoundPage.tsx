@@ -9,8 +9,7 @@ export default function StartRoundPage() {
 	const [courses, setCourses] = useState<Course[]>([]);
 	const navigate = useNavigate();
 
-	const auth = useCustomAuth();
-	const idToken = auth.idToken;
+	const { idToken } = useCustomAuth();
 
 	useEffect(() => {
 		const loadCourses = async () => {
