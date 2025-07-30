@@ -7,7 +7,7 @@ export default function NavBar() {
 	return (
 		<>
 			<div className='fixed bottom-0 left-0 w-screen h-16 bg-gradient-to-b from-transparent to-background' />
-			<nav className='fixed bottom-[32px] left-1/2 -translate-x-1/2 w-80 p-1 bg-glass rounded-full shadow-[0px_2px_5px_1px_rgba(0,0,0,0.15)] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.15)] border-glass backdrop-blur-md inline-flex justify-between items-start overflow-hidden'>
+			<nav className='fixed bottom-[32px] left-1/2 -translate-x-1/2 w-80 p-1 bg-glass border-glass blur-glass drop-shadows rounded-full inline-flex justify-between items-start overflow-hidden'>
 				<NavBarPiece icon={<Home />} text='Home' isActive={true} />
 				<NavBarPiece icon={<Courses />} text='Courses' isActive={false} />
 				<NavBarPiece icon={<Stats />} text='Stats' isActive={false} />

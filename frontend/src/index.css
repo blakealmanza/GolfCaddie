@@ -50,16 +50,37 @@
 
     --text-4xl: 2rem;
 
+    --shadow-*: initial;
+
+    --inset-shadow-2xs: initial;
+    --inset-shadow-xs: inset 0px 1px 1px 0px rgba(0, 0, 0, 0.25);
+    --inset-shadow-sm: inset 0px 3px 4px 0px rgba(0, 0, 0, 0.10);
+
+    --drop-shadow-*: initial;
+    --drop-shadow-xs: 0px 1px 1px 0px rgba(0, 0, 0, 0.15);
+    --drop-shadow-sm: 0px 2px 5px 1px rgba(0, 0, 0, 0.15);
 }
 
 @layer utilities {
     .bg-glass {
-        background-image: linear-gradient(to bottom right, #ffffff99, #ffffff4D);
+        background-image: var(--glass-bg);
     }
 
     .border-glass {
         outline: 1px solid var(--glass-border);
         outline-offset: -1px;
+    }
+
+    .inset-shadows {
+        box-shadow: var(--inset-shadow-xs), var(--inset-shadow-sm);
+    }
+
+    .drop-shadows {
+        box-shadow: var(--drop-shadow-xs), var(--drop-shadow-sm);
+    }
+
+    .blur-glass {
+        backdrop-filter: blur(var(--blur-md));
     }
 }
 
