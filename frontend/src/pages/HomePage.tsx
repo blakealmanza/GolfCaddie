@@ -19,6 +19,8 @@ export default function HomePage() {
 				<PreviousRoundCard />
 				<PreviousRoundCard />
 				<PreviousRoundCard />
+				<PreviousRoundCard />
+				<PreviousRoundCard />
 			</Section>
 			<NavBar />
 		</MainLayout>
