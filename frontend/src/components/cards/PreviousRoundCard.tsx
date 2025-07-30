@@ -1,6 +1,6 @@
 export default function PreviousRoundCard() {
 	return (
-		<div className='self-stretch rounded-lg border-glass inline-flex justify-start items-start overflow-hidden'>
+		<div className='self-stretch rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'>
 			<div className='w-20 self-stretch inline-flex flex-col justify-start items-center overflow-hidden'>
 				<div className='w-24 flex-1 relative'>
 					<img

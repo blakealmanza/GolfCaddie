@@ -1,6 +1,6 @@
 export default function InProgressCard() {
 	return (
-		<div className='self-stretch h-44 rounded-lg border-glass inline-flex flex-col justify-start items-start overflow-hidden'>
+		<div className='self-stretch h-44 rounded-lg border-glass inline-flex flex-col justify-start items-start overflow-hidden shrink-0'>
 			<div className='self-stretch h-24 flex flex-col justify-start items-center overflow-hidden'>
 				<div className='self-stretch h-60 relative'>
 					<img
