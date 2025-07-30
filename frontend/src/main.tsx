@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from 'react-oidc-context';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthWrapper } from './context/AuthContext.tsx';
+import MainLayout from './layouts/MainLayout.tsx';
 import CoursePreviewPage from './pages/CoursePreviewPage.tsx';
 import CoursesPage from './pages/CoursesPage.tsx';
 import HomePage from './pages/HomePage.tsx';
@@ -22,10 +23,15 @@ const cognitoAuthConfig = {
 };
 
 const router = createBrowserRouter([
-	{ path: '/', element: <HomePage /> },
-	{ path: '/courses', element: <CoursesPage /> },
+	{
+		element: <MainLayout />,
+		children: [
+			{ path: '/', element: <HomePage /> },
+			{ path: '/courses', element: <CoursesPage /> },
+			{ path: '/stats', element: <StatsPage /> },
+		],
+	},
 	{ path: '/courses/:id', element: <CoursePreviewPage /> },
-	{ path: '/stats', element: <StatsPage /> },
 	{ path: 'round/:id', element: <RoundPage /> },
 ]);
 
