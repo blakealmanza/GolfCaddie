@@ -55,35 +55,5 @@ export async function listCourses(idToken: string): Promise<Course[]> {
 	}
 
 	const data = await response.json();
-	const parsedCourses = data.courses.map((item: any) =>
-		parseDynamoCourse(item),
-	);
-	return parsedCourses;
-}
-
-export function parseDynamoCourse(item: any): Course {
-	return {
-		courseId: item.courseId.S,
-		name: item.name.S,
-		createdBy: item.createdBy.S,
-		createdAt: '',
-		holes:
-			item.holes?.L.map(
-				(hole: any): CourseHole => ({
-					tee: hole.M.tee.NULL
-						? null
-						: {
-								lat: parseFloat(hole.M.tee.M.lat.N),
-								lng: parseFloat(hole.M.tee.M.lng.N),
-							},
-					pin: hole.M.pin.NULL
-						? null
-						: {
-								lat: parseFloat(hole.M.pin.M.lat.N),
-								lng: parseFloat(hole.M.pin.M.lng.N),
-							},
-					par: parseInt(hole.M.par.N),
-				}),
-			) ?? [],
-	};
+	return data.courses;
 }
