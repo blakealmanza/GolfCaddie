@@ -1,5 +1,6 @@
+import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import Courses from '@/assets/courses.svg?react';
 import Home from '@/assets/home.svg?react';
 import Stats from '@/assets/stats.svg?react';
@@ -26,20 +27,27 @@ function NavBarPiece({
 	text: string;
 	to: string;
 }) {
+	const location = useLocation();
+	const isActive = location.pathname === to;
+
 	return (
-		<NavLink
-			to={to}
-			className={({ isActive }) =>
-				[
-					'flex-1 p-2 rounded-full inline-flex flex-col justify-center items-center gap-1.5 overflow-hidden',
-					isActive ? 'bg-glass border-glass' : '',
-				].join(' ')
-			}
-		>
-			<div className='w-6 h-6 relative overflow-hidden'>{icon}</div>
-			<p className='justify-end text-black text-xs font-medium font-barlow'>
-				{text}
-			</p>
-		</NavLink>
+		<div className='relative flex-1'>
+			{isActive && (
+				<motion.div
+					layoutId='nav-highlight'
+					className='absolute inset-0 bg-glass border-glass rounded-full z-0'
+					transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+				/>
+			)}
+			<NavLink
+				to={to}
+				className='relative z-10 flex flex-1 p-2 rounded-full flex-col justify-center items-center gap-1.5 overflow-hidden'
+			>
+				<div className='w-6 h-6 relative overflow-hidden'>{icon}</div>
+				<p className='justify-end text-black text-xs font-medium font-barlow'>
+					{text}
+				</p>
+			</NavLink>
+		</div>
 	);
 }
