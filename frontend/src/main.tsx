@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from 'react-oidc-context';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthWrapper } from './context/AuthContext.tsx';
@@ -28,16 +29,20 @@ const router = createBrowserRouter([
 	{ path: 'round/:id', element: <RoundPage /> },
 ]);
 
+const queryClient = new QueryClient();
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {
 	createRoot(rootElement).render(
 		// <React.StrictMode>
-		<AuthProvider {...cognitoAuthConfig}>
-			<AuthWrapper>
-				<RouterProvider router={router} />
-			</AuthWrapper>
-		</AuthProvider>,
+		<QueryClientProvider client={queryClient}>
+			<AuthProvider {...cognitoAuthConfig}>
+				<AuthWrapper>
+					<RouterProvider router={router} />
+				</AuthWrapper>
+			</AuthProvider>
+		</QueryClientProvider>,
 		// </React.StrictMode>
 	);
 } else {
