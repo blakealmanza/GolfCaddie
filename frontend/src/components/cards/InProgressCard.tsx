@@ -18,7 +18,7 @@ export default function InProgressCard() {
 						Hole 5/18
 					</p>
 				</div>
-				<div className='h-14 aspect-square p-1.5 bg-lime-50 rounded shadow-[inset_0px_3px_4px_0px_rgba(0,0,0,0.10)] shadow-[inset_0px_1px_1px_0px_rgba(0,0,0,0.25)] inline-flex flex-col justify-center items-center gap-2.5'>
+				<div className='h-14 aspect-square p-1.5 bg-lime-50 rounded inset-shadows inline-flex flex-col justify-center items-center'>
 					<p className='justify-end text-black text-4xl font-semibold font-barlow'>
 						+8
 					</p>
