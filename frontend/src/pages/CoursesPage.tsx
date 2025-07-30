@@ -26,7 +26,6 @@ export default function CoursesPage() {
 		if (courses.length > 0) {
 			courses.forEach((course) => {
 				queryClient.setQueryData(['course', course.courseId], course);
-				console.log(queryClient.getQueryData(['course', course.courseId]));
 			});
 		}
 	}, [courses, queryClient]);
