@@ -1,9 +1,12 @@
-import chambers from '../../../public/chambers.png';
+import { Link } from 'react-router-dom';
 
 export default function InProgressCard() {
 	return (
-		<div className='self-stretch h-44 rounded-lg border-glass inline-flex flex-col justify-start items-start overflow-hidden shrink-0'>
-			<img src={chambers} className='self-stretch h-24 object-cover' />
+		<Link
+			to={`/`}
+			className='self-stretch h-44 rounded-lg border-glass inline-flex flex-col justify-start items-start overflow-hidden shrink-0'
+		>
+			<img src='/chambers.png' className='self-stretch h-24 object-cover' />
 			<div className='self-stretch flex-1 p-3 bg-glass inline-flex justify-start items-start gap-4 overflow-hidden'>
 				<div className='flex-1 self-stretch inline-flex flex-col justify-between items-start'>
 					<p className='self-stretch justify-end text-black text-base font-semibold font-barlow'>
@@ -19,6 +22,6 @@ export default function InProgressCard() {
 					</p>
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }

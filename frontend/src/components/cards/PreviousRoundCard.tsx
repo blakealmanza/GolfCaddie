@@ -1,9 +1,12 @@
-import chambers from '../../../public/chambers.png';
+import { Link } from 'react-router-dom';
 
 export default function PreviousRoundCard() {
 	return (
-		<div className='self-stretch h-20 rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'>
-			<img src={chambers} className='w-20 h-full object-cover' />
+		<Link
+			to={`/`}
+			className='self-stretch h-20 rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'
+		>
+			<img src='/chambers.png' className='w-20 h-full object-cover' />
 			<div className='flex-1 h-full  p-3 bg-glass flex justify-start items-start overflow-hidden'>
 				<div className='flex-1 self-stretch inline-flex flex-col justify-between items-start'>
 					<div className='self-stretch flex flex-col justify-start items-start gap-3'>
@@ -26,6 +29,6 @@ export default function PreviousRoundCard() {
 					</p>
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }
