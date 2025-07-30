@@ -1,15 +1,10 @@
+import chambers from '../../../public/chambers.png';
+
 export default function PreviousRoundCard() {
 	return (
-		<div className='self-stretch rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'>
-			<div className='w-20 self-stretch inline-flex flex-col justify-start items-center overflow-hidden'>
-				<div className='w-24 flex-1 relative'>
-					<img
-						className='w-24 h-20 left-0 top-0 absolute'
-						src='https://placehold.co/89x80'
-					/>
-				</div>
-			</div>
-			<div className='flex-1 self-stretch p-3 bg-glass flex justify-start items-start overflow-hidden'>
+		<div className='self-stretch h-20 rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'>
+			<img src={chambers} className='w-20 h-full object-cover' />
+			<div className='flex-1 h-full  p-3 bg-glass flex justify-start items-start overflow-hidden'>
 				<div className='flex-1 self-stretch inline-flex flex-col justify-between items-start'>
 					<div className='self-stretch flex flex-col justify-start items-start gap-3'>
 						<p className='self-stretch justify-end text-black text-base font-semibold font-barlow'>
