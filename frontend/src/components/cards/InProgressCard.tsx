@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ScoreBox from '../ScoreBox';
 
 export default function InProgressCard() {
 	return (
@@ -16,11 +17,7 @@ export default function InProgressCard() {
 						Hole 5/18
 					</p>
 				</div>
-				<div className='h-14 aspect-square p-1.5 bg-lime-50 rounded inset-shadows inline-flex flex-col justify-center items-center'>
-					<p className='justify-end text-black text-4xl font-semibold font-barlow'>
-						+8
-					</p>
-				</div>
+				<ScoreBox score='+8' />
 			</div>
 		</Link>
 	);

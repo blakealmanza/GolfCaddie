@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ScoreBox from '../ScoreBox';
 
 export default function PreviousRoundCard() {
 	return (
@@ -23,11 +24,7 @@ export default function PreviousRoundCard() {
 						</p>
 					</div>
 				</div>
-				<div className='h-14 aspect-square p-1.5 rounded inset-shadows inline-flex flex-col justify-center items-center'>
-					<p className='justify-end text-black text-4xl font-semibold font-barlow'>
-						92
-					</p>
-				</div>
+				<ScoreBox score='92' />
 			</div>
 		</Link>
 	);
