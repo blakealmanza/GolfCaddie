@@ -39,15 +39,19 @@ function RoundPageContent() {
 
 	return (
 		<div className='relative h-screen w-screen'>
-			<RoundMap />
-			<SecondaryLayout>
-				<div className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'>
-					<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
-						<BackArrow className='text-black' />
+			<div className='absolute inset-0 z-0'>
+				<RoundMap />
+			</div>
+			<div className='relative z-10'>
+				<SecondaryLayout>
+					<div className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'>
+						<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
+							<BackArrow className='text-black' />
+						</div>
 					</div>
-				</div>
-				<HoleInfoPanel />
-			</SecondaryLayout>
+					<HoleInfoPanel />
+				</SecondaryLayout>
+			</div>
 		</div>
 	);
 }

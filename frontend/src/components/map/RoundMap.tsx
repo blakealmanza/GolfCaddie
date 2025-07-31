@@ -89,7 +89,6 @@ export default function RoundMap() {
 					minZoom={15}
 					maxZoom={20}
 					disableDefaultUI
-					style={{ width: '100vw', height: '95vh' }}
 					onClick={handleClick}
 					mapTypeId='satellite'
 				>
