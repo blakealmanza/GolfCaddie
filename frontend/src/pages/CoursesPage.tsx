@@ -1,11 +1,11 @@
 import type { Course } from '@shared/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import ColoredButton from '@/components/ColoredButton';
 import HorizontalCard from '@/components/cards/HorizontalCard';
 import VerticalCard from '@/components/cards/VerticalCard';
 import Header from '@/components/Header';
 import Section from '@/components/Section';
+import ColoredButton from '@/components/ui/ColoredButton';
 import { useCustomAuth } from '@/context/AuthContext';
 import { listCourses } from '@/context/courseService';
 
