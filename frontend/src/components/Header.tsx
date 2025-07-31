@@ -11,7 +11,7 @@ export default function Header({ title }: { title: string }) {
 				className='w-10 h-10 p-2 bg-white rounded-full inline-flex flex-col justify-center items-center overflow-hidden'
 			>
 				<div className='w-5 h-5'>
-					<ProfileIcon />
+					<ProfileIcon className='text-black' />
 				</div>
 			</button>
 		</div>

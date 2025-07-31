@@ -10,9 +10,21 @@ export default function NavBar() {
 		<>
 			<div className='fixed bottom-0 left-0 w-screen h-16 bg-gradient-to-b from-transparent to-background' />
 			<nav className='fixed bottom-[32px] left-1/2 -translate-x-1/2 w-80 p-1 bg-glass border-glass blur-glass drop-shadows rounded-full inline-flex justify-between items-start overflow-hidden'>
-				<NavBarPiece icon={<Home />} text='Home' to='/' />
-				<NavBarPiece icon={<Courses />} text='Courses' to='/courses' />
-				<NavBarPiece icon={<Stats />} text='Stats' to='/stats' />
+				<NavBarPiece
+					icon={<Home className='text-black' />}
+					text='Home'
+					to='/'
+				/>
+				<NavBarPiece
+					icon={<Courses className='text-black' />}
+					text='Courses'
+					to='/courses'
+				/>
+				<NavBarPiece
+					icon={<Stats className='text-black' />}
+					text='Stats'
+					to='/stats'
+				/>
 			</nav>
 		</>
 	);
