@@ -1,16 +1,11 @@
-import type { SelectingMode } from '@shared/types';
 import { useCustomAuth } from '@/context/AuthContext';
+import { useMap } from '@/context/MapContext';
 import { updateHoleInRound } from '@/context/roundService';
 import { useRound } from '../../context/RoundContext';
 
-export default function HoleInfoPanel({
-	addShot,
-	setSelectingMode,
-}: {
-	addShot: () => void;
-	setSelectingMode: (mode: SelectingMode) => void;
-}) {
+export default function HoleInfoPanel() {
 	const { state, dispatch } = useRound();
+	const { state: mapState, dispatch: mapDispatch } = useMap();
 	const { currentHoleIndex, selectedHoleIndex, holes, roundId } = state;
 	const { idToken } = useCustomAuth();
 
@@ -30,13 +25,25 @@ export default function HoleInfoPanel({
 		}
 
 		dispatch({ type: 'NEXT_HOLE' });
-		setSelectingMode('tee');
+		mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'tee' });
 	};
 
 	const previousHole = () => {
 		dispatch({ type: 'PREVIOUS_HOLE' });
 	};
-
+	const addShot = () => {
+		if (!mapState.userCoords) return;
+		dispatch({
+			type: 'ADD_SHOT',
+			payload: {
+				position: mapState.userCoords,
+				target: mapState.target,
+				suggestion: mapState.suggestion,
+			},
+		});
+		mapDispatch({ type: 'SET_TARGET', payload: null });
+		mapDispatch({ type: 'SET_SUGGESTION', payload: null });
+	};
 	// const handleParChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 	// 	dispatch({
 	// 		type: 'SET_PAR',

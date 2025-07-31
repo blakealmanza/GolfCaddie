@@ -1,44 +1,29 @@
-import type {
-	LatLng,
-	RoundHole,
-	SelectingMode,
-	Shot,
-	ShotSuggestion,
-} from '@shared/types';
+import type { LatLng, RoundHole, Shot } from '@shared/types';
 import {
 	APIProvider,
 	Map as GoogleMap,
 	type MapMouseEvent,
 	Marker,
 } from '@vis.gl/react-google-maps';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useMap } from '@/context/MapContext';
 import { useRound } from '../../context/RoundContext';
 import { getDistance } from '../../util/geoUtils';
 import { suggestClub } from '../../util/suggestClub';
 import { Polyline } from './geometry';
 import MapControls from './MapControls';
 
-export default function RoundMap({
-	children,
-}: {
-	children: (props: {
-		addShot: () => void;
-		setSelectingMode: (mode: SelectingMode) => void;
-	}) => React.ReactNode;
-}) {
+export default function RoundMap() {
 	const { state, dispatch } = useRound();
 	const { holes, currentHoleIndex, selectedHoleIndex } = state;
 
-	const [target, setTarget] = useState<LatLng | null>(null);
-	const [suggestion, setSuggestion] = useState<ShotSuggestion | null>(null);
-	const [userCoords, setUserCoords] = useState<LatLng | null>(null);
-	const [selectingMode, setSelectingMode] = useState<SelectingMode>('tee');
+	const { state: mapState, dispatch: mapDispatch } = useMap();
 
 	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
 
 	useEffect(() => {
 		if (selectedHole.tee && selectedHole.pin) {
-			setSelectingMode('target');
+			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'target' });
 		}
 	}, [selectedHole.tee, selectedHole.pin]);
 
@@ -47,21 +32,24 @@ export default function RoundMap({
 	const shots: Shot[] = selectedHole.shots || [];
 
 	useEffect(() => {
-		if (target && userCoords) {
-			const distance = getDistance(userCoords, target);
-			setSuggestion({
-				club: suggestClub(distance),
-				distance,
+		if (mapState.target && mapState.userCoords) {
+			const distance = getDistance(mapState.userCoords, mapState.target);
+			mapDispatch({
+				type: 'SET_SUGGESTION',
+				payload: {
+					club: suggestClub(distance),
+					distance,
+				},
 			});
 		} else {
-			setSuggestion(null);
+			mapDispatch({ type: 'SET_SUGGESTION', payload: null });
 		}
-	}, [target, userCoords]);
+	}, [mapState.target, mapState.userCoords]);
 
 	useEffect(() => {
 		// Clear target when switching to a new hole
-		setTarget(null);
-		setSuggestion(null);
+		mapDispatch({ type: 'SET_TARGET', payload: null });
+		mapDispatch({ type: 'SET_SUGGESTION', payload: null });
 	}, [selectedHoleIndex]);
 
 	const handleClick = (e: MapMouseEvent) => {
@@ -72,35 +60,23 @@ export default function RoundMap({
 			lng: e.detail.latLng.lng,
 		};
 
-		if (selectingMode === 'tee') {
+		if (mapState.selectingMode === 'tee') {
 			dispatch({ type: 'SET_TEE', payload: pos });
-			setSelectingMode('pin');
-		} else if (selectingMode === 'pin') {
+			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'pin' });
+		} else if (mapState.selectingMode === 'pin') {
 			dispatch({ type: 'SET_PIN', payload: pos });
-			setSelectingMode('target');
-		} else if (selectingMode === 'target') {
-			setTarget(pos);
+			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'target' });
+		} else if (mapState.selectingMode === 'target') {
+			mapDispatch({ type: 'SET_TARGET', payload: pos });
 		}
-	};
-
-	const addShot = () => {
-		if (!userCoords) return;
-		dispatch({
-			type: 'ADD_SHOT',
-			payload: {
-				position: userCoords,
-				target,
-				suggestion,
-			},
-		});
-		setTarget(null);
-		setSuggestion(null);
 	};
 
 	const lineCoords: LatLng[] = [
 		...(teeCoords ? [teeCoords] : []),
 		...shots.map((s) => s.position),
-		...(selectedHoleIndex === currentHoleIndex && target ? [target] : []),
+		...(selectedHoleIndex === currentHoleIndex && mapState.target
+			? [mapState.target]
+			: []),
 		...(pinCoords ? [pinCoords] : []),
 	];
 
@@ -119,18 +95,22 @@ export default function RoundMap({
 				>
 					{teeCoords && <Marker position={teeCoords} />}
 					{pinCoords && <Marker position={pinCoords} />}
-					{userCoords && <Marker position={userCoords} />}
+					{mapState.userCoords && <Marker position={mapState.userCoords} />}
 					{shots.length > 0 && (
 						<Marker position={shots[shots.length - 1].position} />
 					)}
-					{selectedHoleIndex === currentHoleIndex && target && (
-						<Marker position={target} />
+					{selectedHoleIndex === currentHoleIndex && mapState.target && (
+						<Marker position={mapState.target} />
 					)}
 					<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
-					<MapControls userCoords={userCoords} setUserCoords={setUserCoords} />
+					<MapControls
+						userCoords={mapState.userCoords}
+						setUserCoords={(coords) =>
+							mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
+						}
+					/>
 				</GoogleMap>
 			</APIProvider>
-			{children({ addShot, setSelectingMode })}
 		</>
 	);
 }
