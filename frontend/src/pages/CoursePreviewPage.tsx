@@ -1,17 +1,19 @@
 import type { Course } from '@shared/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import BackArrow from '@/assets/back-arrow.svg?react';
 import Chip from '@/components/ui/Chip';
 import GlassButton from '@/components/ui/GlassButton';
 import GlassOutlineButton from '@/components/ui/GlassOutlineButton';
 import { useCustomAuth } from '@/context/AuthContext';
 import { fetchCourseById } from '@/context/courseService';
+import { createRound } from '@/context/roundService';
 import SecondaryLayout from '@/layouts/SecondaryLayout';
 
 export default function CoursePreviewPage() {
 	const { id: courseId } = useParams();
 	const { idToken } = useCustomAuth();
+	const navigate = useNavigate();
 
 	const queryClient = useQueryClient();
 
@@ -29,6 +31,12 @@ export default function CoursePreviewPage() {
 		enabled: typeof idToken === 'string',
 		staleTime: 5 * 60 * 1000,
 	});
+
+	const handleStartRound = async (courseId: string) => {
+		if (!idToken) return;
+		const round = await createRound(courseId, idToken);
+		navigate(`/round/${round.roundId}`);
+	};
 
 	return (
 		<SecondaryLayout>
@@ -52,7 +60,10 @@ export default function CoursePreviewPage() {
 				</div>
 				<div className='self-stretch inline-flex justify-start items-start gap-2.5'>
 					<GlassOutlineButton text='Preview' />
-					<GlassButton text='Start' />
+					<GlassButton
+						text='Start'
+						onClick={() => handleStartRound(courseId)}
+					/>
 				</div>
 			</div>
 		</SecondaryLayout>
