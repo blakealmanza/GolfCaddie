@@ -40,11 +40,15 @@ export default function CoursePreviewPage() {
 
 	return (
 		<SecondaryLayout>
-			<div className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'>
+			<button
+				type='button'
+				onClick={() => navigate(-1)}
+				className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'
+			>
 				<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
 					<BackArrow className='text-black' />
 				</div>
-			</div>
+			</button>
 			<div className='self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-start items-start gap-2 overflow-hidden'>
 				<div className='self-stretch p-4 bg-glass rounded-lg border-glass flex flex-col justify-start items-start gap-3'>
 					<p className='self-stretch justify-end text-black text-2xl font-semibold font-barlow leading-relaxed'>

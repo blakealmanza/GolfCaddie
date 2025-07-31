@@ -6,6 +6,7 @@ import {
 	Marker,
 } from '@vis.gl/react-google-maps';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useMap } from '@/context/MapContext';
 import { useRound } from '../../context/RoundContext';
 import { getDistance } from '../../util/geoUtils';
@@ -16,6 +17,7 @@ import MapControls from './MapControls';
 export default function RoundMap() {
 	const { state, dispatch } = useRound();
 	const { holes, currentHoleIndex, selectedHoleIndex } = state;
+	const controlsPortal = document.getElementById('map-controls-portal');
 
 	const { state: mapState, dispatch: mapDispatch } = useMap();
 
@@ -102,12 +104,16 @@ export default function RoundMap() {
 						<Marker position={mapState.target} />
 					)}
 					<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
-					<MapControls
-						userCoords={mapState.userCoords}
-						setUserCoords={(coords) =>
-							mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
-						}
-					/>
+					{controlsPortal &&
+						createPortal(
+							<MapControls
+								userCoords={mapState.userCoords}
+								setUserCoords={(coords) =>
+									mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
+								}
+							/>,
+							controlsPortal,
+						)}
 				</GoogleMap>
 			</APIProvider>
 		</>

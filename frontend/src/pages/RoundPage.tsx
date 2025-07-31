@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import BackArrow from '@/assets/back-arrow.svg?react';
 import HoleInfoPanel from '@/components/hole/HoleInfoPanel';
 import RoundMap from '@/components/map/RoundMap';
@@ -23,6 +23,7 @@ function RoundPageContent() {
 	const { id } = useParams();
 	const { idToken } = useCustomAuth();
 	const { dispatch } = useRound();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const loadRound = async () => {
@@ -39,18 +40,25 @@ function RoundPageContent() {
 
 	return (
 		<div className='relative h-screen w-screen'>
-			<div className='absolute inset-0 z-0'>
-				<RoundMap />
-			</div>
 			<div className='relative z-10'>
 				<SecondaryLayout>
-					<div className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'>
-						<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
-							<BackArrow className='text-black' />
-						</div>
+					<div className='self-stretch inline-flex justify-between items-start'>
+						<button
+							type='button'
+							onClick={() => navigate(-1)}
+							className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'
+						>
+							<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
+								<BackArrow className='text-black' />
+							</div>
+						</button>
+						<div id='map-controls-portal' />
 					</div>
 					<HoleInfoPanel />
 				</SecondaryLayout>
+			</div>
+			<div className='absolute inset-0 z-0'>
+				<RoundMap />
 			</div>
 		</div>
 	);
