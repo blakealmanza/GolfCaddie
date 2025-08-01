@@ -2,12 +2,12 @@
 @import "tailwindcss";
 
 @theme {
-    --color-red-*: initial;
+    /* --color-red-*: initial; */
     --color-orange-*: initial;
     --color-amber-*: initial;
-    --color-yellow-*: initial;
+    /* --color-yellow-*: initial; */
     --color-lime-*: initial;
-    --color-green-*: initial;
+    /* --color-green-*: initial; */
     --color-emerald-*: initial;
     --color-teal-*: initial;
     --color-cyan-*: initial;
@@ -28,6 +28,13 @@
     --color-black: #232323;
     --color-primary: #338753;
     --color-background: #EBEBEB;
+/*
+    --color-red-200: oklch(88.5%, 0.062, 18.334);
+    --color-red-950: oklch(25.8%, 0.092, 26.042);
+    --color-yellow-100: oklch(97.3%, 0.071, 103.193);
+    --color-yellow-950: oklch(28.6%, 0.066, 53.813);
+    --color-green-200: oklch(92.5%, 0.084, 155.995);
+    --color-green-950: oklch(26.6%, 0.065, 152.934); */
 
     --glass-bg: linear-gradient(to bottom right, #ffffff99, #ffffff4D);
     /* --glass-border: linear-gradient(to bottom right, #ffffffB3, #ffffff33); */

@@ -24,7 +24,7 @@ export default function PreviousRoundCard() {
 						</p>
 					</div>
 				</div>
-				<ScoreBox score='92' />
+				<ScoreBox score={92} />
 			</div>
 		</Link>
 	);
