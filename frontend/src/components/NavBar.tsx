@@ -48,7 +48,7 @@ function NavBarPiece({
 				<motion.div
 					layoutId='nav-highlight'
 					className='absolute inset-0 bg-glass border-glass rounded-full z-0'
-					transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+					transition={{ type: 'tween', duration: 0.25 }}
 				/>
 			)}
 			<NavLink
