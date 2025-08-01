@@ -40,19 +40,19 @@ function RoundPageContent() {
 
 	return (
 		<div className='relative h-screen w-screen'>
-			<div className='relative z-10'>
+			<div className='relative z-10 pointer-events-none'>
 				<SecondaryLayout>
-					<div className='self-stretch inline-flex justify-between items-start'>
+					<div className='self-stretch inline-flex justify-between items-start pointer-events-auto'>
 						<button
 							type='button'
 							onClick={() => navigate(-1)}
-							className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'
+							className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center pointer-events-auto'
 						>
 							<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
 								<BackArrow className='text-black' />
 							</div>
 						</button>
-						<div id='map-controls-portal' />
+						<div id='map-controls-portal' className='pointer-events-auto' />
 					</div>
 					<HoleInfoPanel />
 				</SecondaryLayout>

@@ -56,7 +56,7 @@ export default function HoleInfoPanel() {
 	// };
 
 	return (
-		<div className='self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-center items-center gap-2 overflow-hidden'>
+		<div className='pointer-events-auto self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-center items-center gap-2 overflow-hidden'>
 			<div className='self-stretch inline-flex justify-start items-start gap-2'>
 				<button
 					type='button'
