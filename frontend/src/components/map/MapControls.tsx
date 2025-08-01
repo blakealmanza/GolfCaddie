@@ -68,14 +68,14 @@ export default function MapControls({
 	const zoomIn = () => {
 		if (map) {
 			const zoom = map.getZoom();
-			if (zoom != null) map.setZoom(zoom + 1);
+			if (zoom != null) map.setZoom(zoom + 0.5);
 		}
 	};
 
 	const zoomOut = () => {
 		if (map) {
 			const zoom = map.getZoom();
-			if (zoom != null) map.setZoom(zoom - 1);
+			if (zoom != null) map.setZoom(zoom - 0.5);
 		}
 	};
 
