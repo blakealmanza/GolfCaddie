@@ -4,6 +4,7 @@ import {
 	Map as GoogleMap,
 	type MapMouseEvent,
 	Marker,
+	RenderingType,
 } from '@vis.gl/react-google-maps';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -13,6 +14,30 @@ import { getDistance } from '../../util/geoUtils';
 import { suggestClub } from '../../util/suggestClub';
 import { Polyline } from './geometry';
 import MapControls from './MapControls';
+
+function getMapCenter(tee: LatLng | null, pin: LatLng | null): LatLng {
+	if (!tee || !pin) return { lat: 40, lng: -120 };
+
+	return {
+		lat: tee.lat * 0.7 + pin.lat * 0.3,
+		lng: (tee.lng + pin.lng) / 2,
+	};
+}
+
+function getMapHeading(
+	tee: LatLng | null,
+	pin: LatLng | null,
+): number | undefined {
+	if (!tee || !pin) return undefined;
+
+	const dx = pin.lng - tee.lng;
+	const dy = pin.lat - tee.lat;
+	const angleRad = Math.atan2(dx, dy);
+	const angleDeg = (angleRad * 180) / Math.PI;
+	const heading = (angleDeg + 360) % 360;
+
+	return heading;
+}
 
 export default function RoundMap() {
 	const { state, dispatch } = useRound();
@@ -32,6 +57,9 @@ export default function RoundMap() {
 	const teeCoords = selectedHole.tee;
 	const pinCoords = selectedHole.pin;
 	const shots: Shot[] = selectedHole.shots || [];
+
+	const mapCenter = getMapCenter(teeCoords, pinCoords);
+	const mapHeading = getMapHeading(teeCoords, pinCoords);
 
 	useEffect(() => {
 		if (mapState.target && mapState.userCoords) {
@@ -86,13 +114,15 @@ export default function RoundMap() {
 		<>
 			<APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAP_API_KEY}>
 				<GoogleMap
-					defaultCenter={teeCoords || { lat: 40, lng: -120 }}
+					center={mapCenter}
+					heading={mapHeading}
 					defaultZoom={17}
 					minZoom={15}
 					maxZoom={20}
 					disableDefaultUI
 					onClick={handleClick}
 					mapTypeId='satellite'
+					renderingType={RenderingType.VECTOR}
 				>
 					{teeCoords && <Marker position={teeCoords} />}
 					{pinCoords && <Marker position={pinCoords} />}
