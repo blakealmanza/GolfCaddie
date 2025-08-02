@@ -179,7 +179,7 @@ export default function RoundMap() {
 					disableDefaultUI
 					onClick={handleClick}
 					mapTypeId='satellite'
-					mapId='981eea0b3decc282abab0b82'
+					mapId={import.meta.env.VITE_GOOGLE_MAP_ID}
 				>
 					{teeCoords && (
 						<AdvancedMarker position={teeCoords}>
@@ -226,8 +226,11 @@ export default function RoundMap() {
 						</AdvancedMarker>
 					)}
 					<Polyline path={lineCoords} strokeColor='#ffffff' strokeWeight={4} />
-					{lineMidpoints.map((mid, idx) => (
-						<AdvancedMarker key={idx} position={mid.position}>
+					{lineMidpoints.map((mid) => (
+						<AdvancedMarker
+							key={mid.position.lat + mid.position.lng}
+							position={mid.position}
+						>
 							<div
 								style={{
 									background: 'white',
