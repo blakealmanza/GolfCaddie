@@ -18,5 +18,5 @@ export function getDistance(from: LatLng, to: LatLng): number {
 	const distanceMeters = earthRadiusMeters * angularDistance;
 	const yards = distanceMeters * 1.09361;
 
-	return yards;
+	return Math.round(yards);
 }
