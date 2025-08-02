@@ -117,7 +117,6 @@ export default function RoundMap() {
 		height: '12px',
 		position: 'relative' as const,
 		top: '6px',
-		border: '2px solid white',
 	};
 
 	const targetMarkerStyle = {
@@ -129,22 +128,22 @@ export default function RoundMap() {
 	const innerCircle = {
 		background: 'white',
 		borderRadius: '50%',
-		width: '12px',
-		height: '12px',
+		width: '18px',
+		height: '18px',
 		position: 'absolute' as const,
-		top: '16px',
-		left: '6px',
+		top: '12px',
+		left: '4px',
 		zIndex: 2,
 	};
 
 	const outerRing = {
-		border: '2px solid white',
+		border: '4px solid white',
 		borderRadius: '50%',
-		width: '24px',
-		height: '24px',
+		width: '56px',
+		height: '56px',
 		position: 'absolute' as const,
-		top: '10px',
-		left: '0px',
+		top: '-8px',
+		left: '-14px',
 		zIndex: 1,
 	};
 
@@ -225,27 +224,22 @@ export default function RoundMap() {
 							</div>
 						</AdvancedMarker>
 					)}
-					<Polyline path={lineCoords} strokeColor='#ffffff' strokeWeight={4} />
+					<Polyline
+						path={lineCoords}
+						strokeColor='rgba(255,255,255,0.7)'
+						strokeWeight={4}
+					/>
 					{lineMidpoints.map((mid) => (
 						<AdvancedMarker
 							key={mid.position.lat + mid.position.lng}
 							position={mid.position}
 						>
-							<div
-								style={{
-									background: 'white',
-									borderRadius: '8px',
-									padding: '2px 6px',
-									position: 'relative' as const,
-									top: '6px',
-									fontWeight: 600,
-									fontSize: '14px',
-									color: '#000',
-									whiteSpace: 'nowrap',
-									boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-								}}
-							>
-								{mid.label}
+							<div className='bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-center items-center'>
+								<div className='self-stretch px-3 py-2 bg-glass rounded-lg border-glass inline-flex justify-center items-center gap-1 overflow-hidden'>
+									<p className='justify-start text-black text-2xl font-semibold font-barlow'>
+										{mid.label}
+									</p>
+								</div>
 							</div>
 						</AdvancedMarker>
 					))}
