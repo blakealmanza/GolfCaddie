@@ -1,10 +1,9 @@
 import type { LatLng, RoundHole, Shot } from '@shared/types';
 import {
+	AdvancedMarker,
 	APIProvider,
 	Map as GoogleMap,
 	type MapMouseEvent,
-	Marker,
-	RenderingType,
 } from '@vis.gl/react-google-maps';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -63,7 +62,7 @@ export default function RoundMap() {
 
 	useEffect(() => {
 		if (mapState.target && mapState.userCoords) {
-			const distance = getDistance(mapState.userCoords, mapState.target);
+			const distance = getDistance(teeCoords!, mapState.target);
 			mapDispatch({
 				type: 'SET_SUGGESTION',
 				payload: {
@@ -110,6 +109,64 @@ export default function RoundMap() {
 		...(pinCoords ? [pinCoords] : []),
 	];
 
+	// Marker styles
+	const whiteDotStyle = {
+		background: 'white',
+		borderRadius: '50%',
+		width: '12px',
+		height: '12px',
+		position: 'relative' as const,
+		top: '6px',
+		border: '2px solid white',
+	};
+
+	const targetMarkerStyle = {
+		position: 'relative' as const,
+		width: '24px',
+		height: '24px',
+	};
+
+	const innerCircle = {
+		background: 'white',
+		borderRadius: '50%',
+		width: '12px',
+		height: '12px',
+		position: 'absolute' as const,
+		top: '16px',
+		left: '6px',
+		zIndex: 2,
+	};
+
+	const outerRing = {
+		border: '2px solid white',
+		borderRadius: '50%',
+		width: '24px',
+		height: '24px',
+		position: 'absolute' as const,
+		top: '10px',
+		left: '0px',
+		zIndex: 1,
+	};
+
+	const getMidpoint = (a: LatLng, b: LatLng): LatLng => ({
+		lat: (a.lat + b.lat) / 2,
+		lng: (a.lng + b.lng) / 2,
+	});
+
+	const lineMidpoints: { position: LatLng; label: string }[] = [];
+	if (teeCoords && mapState.target && mapState.suggestion) {
+		lineMidpoints.push({
+			position: getMidpoint(teeCoords, mapState.target),
+			label: `${mapState.suggestion.distance} - ${mapState.suggestion.club}`,
+		});
+	}
+	if (mapState.target && pinCoords) {
+		lineMidpoints.push({
+			position: getMidpoint(mapState.target, pinCoords),
+			label: `${getDistance(mapState.target, pinCoords)} - 8i`,
+		});
+	}
+
 	return (
 		<>
 			<APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAP_API_KEY}>
@@ -122,18 +179,73 @@ export default function RoundMap() {
 					disableDefaultUI
 					onClick={handleClick}
 					mapTypeId='satellite'
-					renderingType={RenderingType.VECTOR}
+					mapId='981eea0b3decc282abab0b82'
 				>
-					{teeCoords && <Marker position={teeCoords} />}
-					{pinCoords && <Marker position={pinCoords} />}
-					{mapState.userCoords && <Marker position={mapState.userCoords} />}
+					{teeCoords && (
+						<AdvancedMarker position={teeCoords}>
+							<div style={whiteDotStyle} />
+						</AdvancedMarker>
+					)}
+					{pinCoords && (
+						<AdvancedMarker position={pinCoords}>
+							<div style={whiteDotStyle} />
+						</AdvancedMarker>
+					)}
+					{mapState.userCoords && (
+						<AdvancedMarker position={mapState.userCoords}>
+							<div
+								style={{
+									background: '#00d0ff',
+									borderRadius: '50%',
+									width: '14px',
+									height: '14px',
+									border: '2px solid #fff',
+								}}
+							/>
+						</AdvancedMarker>
+					)}
 					{shots.length > 0 && (
-						<Marker position={shots[shots.length - 1].position} />
+						<AdvancedMarker position={shots[shots.length - 1].position}>
+							<div
+								style={{
+									background: '#00d0ff',
+									borderRadius: '50%',
+									width: '14px',
+									height: '14px',
+									border: '2px solid #fff',
+								}}
+							/>
+						</AdvancedMarker>
 					)}
 					{selectedHoleIndex === currentHoleIndex && mapState.target && (
-						<Marker position={mapState.target} />
+						<AdvancedMarker position={mapState.target}>
+							<div style={targetMarkerStyle}>
+								<div style={outerRing} />
+								<div style={innerCircle} />
+							</div>
+						</AdvancedMarker>
 					)}
-					<Polyline path={lineCoords} strokeColor='#00ffff' strokeWeight={4} />
+					<Polyline path={lineCoords} strokeColor='#ffffff' strokeWeight={4} />
+					{lineMidpoints.map((mid, idx) => (
+						<AdvancedMarker key={idx} position={mid.position}>
+							<div
+								style={{
+									background: 'white',
+									borderRadius: '8px',
+									padding: '2px 6px',
+									position: 'relative' as const,
+									top: '6px',
+									fontWeight: 600,
+									fontSize: '14px',
+									color: '#000',
+									whiteSpace: 'nowrap',
+									boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+								}}
+							>
+								{mid.label}
+							</div>
+						</AdvancedMarker>
+					))}
 					{controlsPortal &&
 						createPortal(
 							<MapControls
