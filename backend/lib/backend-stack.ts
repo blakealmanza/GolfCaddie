@@ -26,6 +26,13 @@ export class BackendStack extends cdk.Stack {
 			removalPolicy: cdk.RemovalPolicy.RETAIN,
 		});
 
+		roundsTable.addGlobalSecondaryIndex({
+			indexName: 'userIdIndex',
+			partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+			sortKey: { name: 'startedAt', type: dynamodb.AttributeType.STRING },
+			projectionType: dynamodb.ProjectionType.ALL,
+		});
+
 		const usersTable = new dynamodb.Table(this, 'UsersTable', {
 			partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -92,6 +99,12 @@ export class BackendStack extends cdk.Stack {
 		const getRoundIntegration = makeLambda(
 			'GetRoundFunction',
 			'lambda/getRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
+		const getUserRoundsIntegration = makeLambda(
+			'GetUserRoundsFunction',
+			'lambda/getUserRounds',
 			{ ROUNDS_TABLE: roundsTable.tableName },
 			[roundsTable],
 		);
@@ -192,6 +205,11 @@ export class BackendStack extends cdk.Stack {
 			authorizer,
 		});
 		roundById.addMethod('GET', getRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		rounds.addMethod('GET', getUserRoundsIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
