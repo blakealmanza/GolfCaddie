@@ -12,8 +12,8 @@ export default defineConfig({
 		tailwindcss(),
 		svgr(),
 		VitePWA({
-			registerType: 'prompt',
-			injectRegister: false,
+			registerType: 'autoUpdate',
+			injectRegister: 'auto',
 
 			pwaAssets: {
 				disabled: false,
@@ -26,8 +26,15 @@ export default defineConfig({
 				description:
 					'A golf app designed to guide you and help you achieve lower scores',
 				theme_color: '#E2F4ED',
+				background_color: '#E2F4ED',
 				orientation: 'portrait',
+				display: 'standalone',
+				display_override: ['standalone', 'window-controls-overlay'],
 				start_url: '/',
+				id: '/',
+
+				// Chrome specific config
+				...({ form_factor: ['narrow', 'wide'] } as any),
 			},
 
 			workbox: {
