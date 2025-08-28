@@ -3,7 +3,7 @@ import {
 	GetCommand,
 	PutCommand,
 } from '@aws-sdk/lib-dynamodb';
-import type { Course, CourseHole, RoundHole } from '@shared/types';
+import type { Course, CourseHole, Round, RoundHole } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamoClient } from '../shared/dynamoClient';
@@ -27,11 +27,12 @@ export async function handler(event: APIGatewayProxyEvent) {
 
 		const roundId = uuidv4();
 		const userId = event.requestContext.authorizer?.claims?.sub;
-		const now = new Date().toISOString();
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 		let holes = Array.from({ length: 18 }, generateEmptyHole);
+		let courseName = '';
+		let courseLocation = '';
 
 		if (courseId) {
 			const result = await docClient.send(
@@ -42,6 +43,9 @@ export async function handler(event: APIGatewayProxyEvent) {
 			);
 
 			const courseData = result.Item as Course | undefined;
+
+			courseName = courseData?.name ?? 'No Name';
+			courseLocation = courseData?.location ?? 'No Location';
 
 			const courseHoles = courseData?.holes;
 			if (courseHoles) {
@@ -54,12 +58,13 @@ export async function handler(event: APIGatewayProxyEvent) {
 			}
 		}
 
-		const item = {
+		const item: Round = {
 			roundId,
 			userId,
-			startedAt: now,
-			status: 'IN_PROGRESS',
+			startedAt: new Date().toISOString(),
 			courseId: courseId ?? null,
+			courseName,
+			courseLocation,
 			holes,
 		};
 
