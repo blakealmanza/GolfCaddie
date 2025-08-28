@@ -75,6 +75,7 @@ export async function endRound(
 	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}/end`, {
 		method: 'POST',
 		headers: {
+			'Content-Type': 'application/json',
 			Authorization: `Bearer ${idToken}`,
 		},
 	});
@@ -86,7 +87,9 @@ export async function endRound(
 
 export async function fetchUserRounds(idToken: string): Promise<Round[]> {
 	const response = await fetch(`${API_BASE_URL}/rounds`, {
+		method: 'GET',
 		headers: {
+			'Content-Type': 'application/json',
 			Authorization: `Bearer ${idToken}`,
 		},
 	});

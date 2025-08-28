@@ -11,13 +11,12 @@ import { listCourses } from '@/context/courseService';
 
 export default function CoursesPage() {
 	const { idToken } = useCustomAuth();
-	if (!idToken) return null;
 
 	const queryClient = useQueryClient();
 
 	const { data: courses = [], isLoading } = useQuery<Course[]>({
 		queryKey: ['courses'],
-		queryFn: () => listCourses(idToken),
+		queryFn: () => listCourses(idToken!),
 		enabled: typeof idToken === 'string' && idToken.length > 0,
 		staleTime: 5 * 60 * 1000,
 	});
@@ -29,6 +28,8 @@ export default function CoursesPage() {
 			});
 		}
 	}, [courses, queryClient]);
+
+	if (!idToken) return null;
 
 	return (
 		<>

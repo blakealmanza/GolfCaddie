@@ -11,14 +11,13 @@ import { fetchUserRounds } from '@/context/roundService';
 
 export default function HomePage() {
 	const { idToken } = useCustomAuth();
-	if (!idToken) return null;
 
 	const queryClient = useQueryClient();
 
 	const { data: rounds = [], isLoading } = useQuery<Round[]>({
 		queryKey: ['rounds'],
-		queryFn: () => fetchUserRounds(idToken),
-		enabled: typeof idToken === 'string' && idToken.length > 0,
+		queryFn: () => fetchUserRounds(idToken!),
+		enabled: !!idToken, // only run query if idToken exists
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -29,6 +28,8 @@ export default function HomePage() {
 			});
 		}
 	}, [rounds, queryClient]);
+
+	if (!idToken) return null;
 
 	return (
 		<>
