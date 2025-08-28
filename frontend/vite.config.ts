@@ -26,6 +26,8 @@ export default defineConfig({
 				description:
 					'A golf app designed to guide you and help you achieve lower scores',
 				theme_color: '#E2F4ED',
+				orientation: 'portrait',
+				start_url: '/',
 			},
 
 			workbox: {
