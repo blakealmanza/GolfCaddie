@@ -83,3 +83,18 @@ export async function endRound(
 		throw new Error(`Failed to end round ${roundId}: ${response.statusText}`);
 	}
 }
+
+export async function fetchUserRounds(idToken: string): Promise<Round[]> {
+	const response = await fetch(`${API_BASE_URL}/rounds`, {
+		headers: {
+			Authorization: `Bearer ${idToken}`,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch rounds: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	return data.rounds;
+}

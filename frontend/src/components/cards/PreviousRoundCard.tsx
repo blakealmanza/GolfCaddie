@@ -1,7 +1,8 @@
+import type { Round } from '@shared/types';
 import { Link } from 'react-router-dom';
 import ScoreBox from '../ScoreBox';
 
-export default function PreviousRoundCard() {
+export default function PreviousRoundCard({ roundData }: { roundData: Round }) {
 	return (
 		<Link
 			to={`/`}
@@ -20,11 +21,15 @@ export default function PreviousRoundCard() {
 					</div>
 					<div className='self-stretch inline-flex justify-start items-start gap-2.5'>
 						<p className='flex-1 justify-end text-black text-xs font-medium font-barlow'>
-							June 30th, 2025
+							{new Date(roundData.startedAt).toLocaleDateString('en-US', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							})}
 						</p>
 					</div>
 				</div>
-				<ScoreBox score={92} />
+				<ScoreBox score={roundData.holes[0].shots.length} />
 			</div>
 		</Link>
 	);
