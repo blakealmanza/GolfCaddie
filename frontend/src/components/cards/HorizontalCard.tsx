@@ -15,18 +15,22 @@ export default function HorizontalCard({ courseData }: { courseData: Course }) {
 							{courseData.name}
 						</p>
 						<p className='self-stretch justify-end text-black text-xs font-semibold font-barlow'>
-							Seattle, WA
+							{courseData.location}
 						</p>
 					</div>
 					<div className='self-stretch inline-flex justify-end items-start gap-1.5'>
 						<div className='px-3 py-1.5 bg-glass rounded-full border-glass inline-flex flex-col justify-center items-center'>
 							<p className='justify-end text-black text-xs font-medium font-barlow'>
-								{courseData.holes.length}
+								{courseData.holes.length} Holes
 							</p>
 						</div>
 						<div className='px-3 py-1.5 bg-glass rounded-full border-glass inline-flex flex-col justify-center items-center'>
 							<p className='justify-end text-black text-xs font-medium font-barlow'>
-								Par 72
+								Par{' '}
+								{courseData.holes.reduce(
+									(total, hole) => total + (hole.par || 0),
+									0,
+								)}
 							</p>
 						</div>
 					</div>

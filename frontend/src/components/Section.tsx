@@ -10,7 +10,7 @@ export default function Section({
 	children: ReactNode;
 }) {
 	const classes = isHorizontal
-		? 'w-full inline-flex justify-start items-start gap-3 overflow-x-auto whitespace-nowrap'
+		? 'w-full inline-flex justify-start items-start gap-3 overflow-x-auto overflow-y-hidden whitespace-nowrap'
 		: 'w-full inline-flex flex-col justify-start items-start gap-3 overflow-hidden';
 
 	return (
