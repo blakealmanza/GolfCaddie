@@ -16,14 +16,14 @@ export default function PreviousRoundCard({ roundData }: { roundData: Round }) {
 			<div className='flex-1 p-3 gap-3 bg-glass flex min-w-0'>
 				<div className='self-stretch flex-1 min-w-0 flex flex-col justify-between'>
 					<div className='flex flex-col gap-3'>
-						<p className='text-black text-base font-semibold font-barlow truncate'>
+						<p className='text-black text-base font-semibold font-barlow whitespace-nowrap overflow-x-clip text-ellipsis'>
 							{roundData.courseName}
 						</p>
-						<p className='text-black text-xs font-semibold font-barlow truncate'>
+						<p className='text-black text-xs font-semibold font-barlow whitespace-nowrap overflow-x-clip text-ellipsis'>
 							{roundData.courseLocation}
 						</p>
 					</div>
-					<p className='text-black text-xs font-medium font-barlow truncate'>
+					<p className='text-black text-xs font-medium font-barlow whitespace-nowrap overflow-x-clip text-ellipsis'>
 						{new Date(roundData.startedAt).toLocaleDateString('en-US', {
 							year: 'numeric',
 							month: 'long',
