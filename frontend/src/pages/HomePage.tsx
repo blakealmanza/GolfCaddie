@@ -34,9 +34,11 @@ export default function HomePage() {
 	return (
 		<>
 			<Header title='Home' />
-			<Section title='Currently Playing'>
-				<InProgressCard roundData={rounds[0]} />
-			</Section>
+			{rounds.length > 0 && (
+				<Section title='Currently Playing'>
+					<InProgressCard roundData={rounds[0]} />
+				</Section>
+			)}
 			<ColoredButton text='Start New Round' />
 			<Section title='Previous Rounds'>
 				{!isLoading &&

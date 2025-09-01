@@ -17,7 +17,7 @@ export default function PreviousRoundCard({
 
 	const { data: courseData } = useQuery<Course>({
 		queryKey: ['course', roundData.courseId],
-		queryFn: () => fetchCourseById(idToken!, roundData.courseId),
+		queryFn: () => fetchCourseById(roundData.courseId, idToken!),
 		initialData: () => queryClient.getQueryData(['course', roundData.courseId]),
 	});
 
