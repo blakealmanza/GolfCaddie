@@ -17,20 +17,26 @@ export default function CoursePreviewPage() {
 
 	const queryClient = useQueryClient();
 
-	if (!courseId || !idToken) return null;
-
-	const { data: course } = useQuery({
+	const { data: course } = useQuery<Course>({
 		queryKey: ['course', courseId],
-		queryFn: () => fetchCourseById(courseId, idToken),
-		initialData: () => {
-			const courses = queryClient.getQueryData(['courses']) as
-				| Course[]
-				| undefined;
-			return courses?.find((c) => c.courseId === courseId);
-		},
+		queryFn: () => fetchCourseById(courseId!, idToken!),
+		initialData: () => queryClient.getQueryData(['course', courseId]),
 		enabled: typeof idToken === 'string',
 		staleTime: 5 * 60 * 1000,
 	});
+
+	const courseName = course?.name || 'Unknown Course';
+	const courseLocation = course?.location || 'Unknown Location';
+	const courseHoles = course?.holes?.length || 18;
+	const coursePar =
+		course?.holes?.reduce((acc, hole) => acc + hole.par, 0) || 72;
+
+	const backgroundImageUrl = course?.images?.thumbnail?.img
+		? `${import.meta.env.VITE_S3_COURSES_BUCKET}/${course.courseId}/${course.images.thumbnail.img}`
+		: '/placeholder-course.png';
+
+	const backgroundImageAlt =
+		course?.images?.thumbnail?.alt || 'Course background image';
 
 	const handleStartRound = async (courseId: string) => {
 		if (!idToken) return;
@@ -38,8 +44,12 @@ export default function CoursePreviewPage() {
 		navigate(`/round/${round.roundId}`);
 	};
 
+	if (!courseId || !idToken) return null;
+
 	return (
-		<SecondaryLayout>
+		<SecondaryLayout
+			background={{ src: backgroundImageUrl, alt: backgroundImageAlt }}
+		>
 			<button
 				type='button'
 				onClick={() => navigate(-1)}
@@ -52,14 +62,14 @@ export default function CoursePreviewPage() {
 			<div className='self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-start items-start gap-2 overflow-hidden'>
 				<div className='self-stretch p-4 bg-glass rounded-lg border-glass flex flex-col justify-start items-start gap-3'>
 					<p className='self-stretch justify-end text-black text-2xl font-semibold font-barlow leading-relaxed'>
-						{course?.name}
+						{courseName}
 					</p>
 					<p className='self-stretch justify-end text-black text-base font-semibold font-barlow'>
-						Seattle, WA
+						{courseLocation}
 					</p>
 					<div className='self-stretch inline-flex justify-end items-start gap-1.5'>
-						<Chip text='18 holes' />
-						<Chip text='Par 72' />
+						<Chip text={`${courseHoles} holes`} />
+						<Chip text={`Par ${coursePar}`} />
 					</div>
 				</div>
 				<div className='self-stretch inline-flex justify-start items-start gap-2.5'>
