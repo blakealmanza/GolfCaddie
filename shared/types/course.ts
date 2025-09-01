@@ -9,4 +9,8 @@ export type Course = {
 	holes: CourseHole[];
 	createdBy: string;
 	createdAt: string;
+	images: {
+		thumbnail: { img: string; alt: string };
+		gallery: { img: string; alt: string }[];
+	};
 };

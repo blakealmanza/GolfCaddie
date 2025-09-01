@@ -35,7 +35,7 @@ export default function HomePage() {
 		<>
 			<Header title='Home' />
 			<Section title='Currently Playing'>
-				<InProgressCard />
+				<InProgressCard roundData={rounds[0]} />
 			</Section>
 			<ColoredButton text='Start New Round' />
 			<Section title='Previous Rounds'>

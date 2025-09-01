@@ -2,12 +2,18 @@ import type { Course } from '@shared/types';
 import { Link } from 'react-router-dom';
 
 export default function HorizontalCard({ courseData }: { courseData: Course }) {
+	const imageBaseURL = `${import.meta.env.VITE_S3_COURSES_BUCKET}/${courseData.courseId}`;
+
 	return (
 		<Link
 			to={`/courses/${courseData.courseId}`}
 			className='self-stretch h-20 rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'
 		>
-			<img src='/chambers.png' className='w-20 h-full object-cover' />
+			<img
+				src={`${imageBaseURL}/${courseData.images.thumbnail.img}`}
+				alt={`${imageBaseURL}/${courseData.images.thumbnail.alt}`}
+				className='w-20 h-full object-cover'
+			/>
 			<div className='flex-1 h-full p-3 bg-glass flex justify-start items-start gap-3 overflow-hidden'>
 				<div className='flex-1 self-stretch inline-flex flex-col justify-between items-start'>
 					<div className='self-stretch flex flex-col justify-start items-start gap-3'>
