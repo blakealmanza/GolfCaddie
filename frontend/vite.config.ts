@@ -54,14 +54,9 @@ export default defineConfig({
 	build: {
 		rollupOptions: {
 			output: {
-				manualChunks(id) {
-					if (id.includes('node_modules')) {
-						if (id.includes('react')) return 'vendor_react';
-						if (id.includes('@tanstack')) return 'vendor_tanstack';
-						if (id.includes('firebase')) return 'vendor_firebase';
-						if (id.includes('maplibre-gl')) return 'vendor_maplibre';
-						return 'vendor_node_modules';
-					}
+				manualChunks: {
+					vendor_react: ['react', 'react-dom', 'react-router-dom'],
+					vendor_tanstack: ['@tanstack/react-query'],
 				},
 			},
 		},
