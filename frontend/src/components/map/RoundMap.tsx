@@ -40,7 +40,7 @@ function getMapHeading(
 
 export default function RoundMap() {
 	const { state, dispatch } = useRound();
-	const { holes, currentHoleIndex, selectedHoleIndex } = state;
+	const { holes, currentHoleIndex, selectedHoleIndex, isPreviewMode } = state;
 	const controlsPortal = document.getElementById('map-controls-portal');
 
 	const { state: mapState, dispatch: mapDispatch } = useMap();
@@ -48,10 +48,12 @@ export default function RoundMap() {
 	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
 
 	useEffect(() => {
-		if (selectedHole.tee && selectedHole.pin) {
+		if (isPreviewMode) {
+			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'none' });
+		} else if (selectedHole.tee && selectedHole.pin) {
 			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'target' });
 		}
-	}, [selectedHole.tee, selectedHole.pin]);
+	}, [selectedHole.tee, selectedHole.pin, isPreviewMode, mapDispatch]);
 
 	const teeCoords = selectedHole.tee;
 	const pinCoords = selectedHole.pin;
@@ -61,8 +63,8 @@ export default function RoundMap() {
 	const mapHeading = getMapHeading(teeCoords, pinCoords);
 
 	useEffect(() => {
-		if (mapState.target && mapState.userCoords) {
-			const distance = getDistance(teeCoords!, mapState.target);
+		if (mapState.target && mapState.userCoords && teeCoords) {
+			const distance = getDistance(teeCoords, mapState.target);
 			mapDispatch({
 				type: 'SET_SUGGESTION',
 				payload: {
@@ -73,7 +75,7 @@ export default function RoundMap() {
 		} else {
 			mapDispatch({ type: 'SET_SUGGESTION', payload: null });
 		}
-	}, [mapState.target, mapState.userCoords]);
+	}, [mapState.target, mapState.userCoords, teeCoords, mapDispatch]);
 
 	useEffect(() => {
 		// Clear target when switching to a new hole
@@ -82,6 +84,9 @@ export default function RoundMap() {
 	}, [selectedHoleIndex]);
 
 	const handleClick = (e: MapMouseEvent) => {
+		// Disable all interactions in preview mode
+		if (isPreviewMode) return;
+
 		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;
 
 		const pos: LatLng = {
@@ -103,7 +108,10 @@ export default function RoundMap() {
 	const lineCoords: LatLng[] = [
 		...(teeCoords ? [teeCoords] : []),
 		...shots.map((s) => s.position),
-		...(selectedHoleIndex === currentHoleIndex && mapState.target
+		// Only show target lines in non-preview mode
+		...(selectedHoleIndex === currentHoleIndex &&
+		mapState.target &&
+		!isPreviewMode
 			? [mapState.target]
 			: []),
 		...(pinCoords ? [pinCoords] : []),
@@ -153,17 +161,20 @@ export default function RoundMap() {
 	});
 
 	const lineMidpoints: { position: LatLng; label: string }[] = [];
-	if (teeCoords && mapState.target && mapState.suggestion) {
-		lineMidpoints.push({
-			position: getMidpoint(teeCoords, mapState.target),
-			label: `${mapState.suggestion.distance} - ${mapState.suggestion.club}`,
-		});
-	}
-	if (mapState.target && pinCoords) {
-		lineMidpoints.push({
-			position: getMidpoint(mapState.target, pinCoords),
-			label: `${getDistance(mapState.target, pinCoords)} - 8i`,
-		});
+	// Only show distance/club suggestions in non-preview mode
+	if (!isPreviewMode) {
+		if (teeCoords && mapState.target && mapState.suggestion) {
+			lineMidpoints.push({
+				position: getMidpoint(teeCoords, mapState.target),
+				label: `${mapState.suggestion.distance} - ${mapState.suggestion.club}`,
+			});
+		}
+		if (mapState.target && pinCoords) {
+			lineMidpoints.push({
+				position: getMidpoint(mapState.target, pinCoords),
+				label: `${getDistance(mapState.target, pinCoords)} - 8i`,
+			});
+		}
 	}
 
 	return (
@@ -216,14 +227,16 @@ export default function RoundMap() {
 							/>
 						</AdvancedMarker>
 					)}
-					{selectedHoleIndex === currentHoleIndex && mapState.target && (
-						<AdvancedMarker position={mapState.target}>
-							<div style={targetMarkerStyle}>
-								<div style={outerRing} />
-								<div style={innerCircle} />
-							</div>
-						</AdvancedMarker>
-					)}
+					{selectedHoleIndex === currentHoleIndex &&
+						mapState.target &&
+						!isPreviewMode && (
+							<AdvancedMarker position={mapState.target}>
+								<div style={targetMarkerStyle}>
+									<div style={outerRing} />
+									<div style={innerCircle} />
+								</div>
+							</AdvancedMarker>
+						)}
 					<Polyline
 						path={lineCoords}
 						strokeColor='rgba(255,255,255,0.7)'
@@ -250,6 +263,7 @@ export default function RoundMap() {
 								setUserCoords={(coords) =>
 									mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
 								}
+								isPreviewMode={isPreviewMode}
 							/>,
 							controlsPortal,
 						)}

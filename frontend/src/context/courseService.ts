@@ -1,4 +1,4 @@
-import type { Course } from '@shared/types';
+import type { Course, Round } from '@shared/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -56,4 +56,21 @@ export async function listCourses(idToken: string): Promise<Course[]> {
 
 	const data = await response.json();
 	return data.courses;
+}
+
+export function createPreviewRound(course: Course): Round {
+	return {
+		roundId: `preview-${course.courseId}`,
+		userId: 'preview-user',
+		courseId: course.courseId,
+		courseName: course.name,
+		courseLocation: course.location,
+		startedAt: new Date().toISOString(),
+		holes: course.holes.map((hole) => ({
+			tee: hole.tee,
+			pin: hole.pin,
+			par: hole.par,
+			shots: [], // No shots in preview mode
+		})),
+	};
 }

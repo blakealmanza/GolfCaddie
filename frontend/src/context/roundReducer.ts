@@ -7,6 +7,7 @@ export interface RoundState {
 	holes: RoundHole[];
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
+	isPreviewMode: boolean;
 }
 
 export type RoundAction =
@@ -19,10 +20,12 @@ export type RoundAction =
 	| { type: 'NEXT_HOLE' }
 	| { type: 'PREVIOUS_HOLE' }
 	| { type: 'SET_PAR'; payload: number }
+	| { type: 'SET_PREVIEW_MODE'; payload: boolean }
 	| {
 			type: 'INITIALIZE_ROUND';
 			payload: {
 				round: Round;
+				isPreviewMode?: boolean;
 			};
 	  };
 
@@ -38,6 +41,7 @@ export const initialRoundState: RoundState = {
 	],
 	currentHoleIndex: 0,
 	selectedHoleIndex: 0,
+	isPreviewMode: false,
 };
 
 export function roundReducer(
@@ -48,12 +52,21 @@ export function roundReducer(
 		case 'INITIALIZE_ROUND': {
 			const initialRoundHoles = action.payload.round.holes;
 			const roundId = action.payload.round.roundId;
+			const isPreviewMode = action.payload.isPreviewMode ?? false;
 			return {
 				...state,
 				roundId,
 				holes: initialRoundHoles,
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
+				isPreviewMode,
+			};
+		}
+
+		case 'SET_PREVIEW_MODE': {
+			return {
+				...state,
+				isPreviewMode: action.payload,
 			};
 		}
 

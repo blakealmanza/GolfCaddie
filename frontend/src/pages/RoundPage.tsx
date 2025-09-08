@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import BackArrow from '@/assets/back-arrow.svg?react';
 import HoleInfoPanel from '@/components/hole/HoleInfoPanel';
 import RoundMap from '@/components/map/RoundMap';
 import { useCustomAuth } from '@/context/AuthContext';
+import { createPreviewRound, fetchCourseById } from '@/context/courseService';
 import { MapProvider } from '@/context/MapContext';
 import { RoundProvider, useRound } from '@/context/RoundContext';
 import { fetchRoundById } from '@/context/roundService';
@@ -24,19 +25,36 @@ function RoundPageContent() {
 	const { idToken } = useCustomAuth();
 	const { dispatch } = useRound();
 	const navigate = useNavigate();
+	const location = useLocation();
+
+	const isPreviewMode = location.pathname.includes('/preview');
 
 	useEffect(() => {
 		const loadRound = async () => {
-			if (!idToken || !id) return;
-			const roundData = await fetchRoundById(id, idToken);
-			dispatch({
-				type: 'INITIALIZE_ROUND',
-				payload: { round: roundData },
-			});
+			if (!id) return;
+
+			if (isPreviewMode) {
+				// Load course data for preview mode
+				if (!idToken) return;
+				const courseData = await fetchCourseById(id, idToken);
+				const previewRound = createPreviewRound(courseData);
+				dispatch({
+					type: 'INITIALIZE_ROUND',
+					payload: { round: previewRound, isPreviewMode: true },
+				});
+			} else {
+				// Load regular round data
+				if (!idToken) return;
+				const roundData = await fetchRoundById(id, idToken);
+				dispatch({
+					type: 'INITIALIZE_ROUND',
+					payload: { round: roundData, isPreviewMode: false },
+				});
+			}
 		};
 
 		loadRound();
-	}, [id, idToken, dispatch]);
+	}, [id, idToken, dispatch, isPreviewMode]);
 
 	return (
 		<div className='relative h-screen w-screen'>

@@ -9,26 +9,30 @@ import ScoreBox from '../ScoreBox';
 export default function HoleInfoPanel() {
 	const { state, dispatch } = useRound();
 	const { state: mapState, dispatch: mapDispatch } = useMap();
-	const { selectedHoleIndex, holes, roundId } = state;
+	const { selectedHoleIndex, holes, roundId, isPreviewMode } = state;
 	const { idToken } = useCustomAuth();
 
 	const selectedCourseHole = holes[selectedHoleIndex];
 
 	const nextHole = async () => {
-		try {
-			if (!idToken || !roundId) return;
-			await updateHoleInRound(
-				roundId,
-				selectedHoleIndex,
-				selectedCourseHole,
-				idToken,
-			);
-		} catch (error) {
-			console.error('Failed to save hole:', error);
+		if (!isPreviewMode) {
+			try {
+				if (!idToken || !roundId) return;
+				await updateHoleInRound(
+					roundId,
+					selectedHoleIndex,
+					selectedCourseHole,
+					idToken,
+				);
+			} catch (error) {
+				console.error('Failed to save hole:', error);
+			}
 		}
 
 		dispatch({ type: 'NEXT_HOLE' });
-		mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'tee' });
+		if (!isPreviewMode) {
+			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'tee' });
+		}
 	};
 
 	const previousHole = () => {
@@ -57,33 +61,42 @@ export default function HoleInfoPanel() {
 
 	return (
 		<div className='pointer-events-auto self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-center items-center gap-2 overflow-hidden'>
-			<div className='self-stretch inline-flex justify-start items-start gap-2'>
-				<button
-					type='button'
-					className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
-				>
-					<p className='justify-end text-black text-base font-semibold font-barlow'>
-						Scorecard
+			{isPreviewMode && (
+				<div className='self-stretch px-3 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30 inline-flex justify-center items-center'>
+					<p className='text-blue-600 text-sm font-semibold font-barlow'>
+						Preview Mode - View Only
 					</p>
-				</button>
-				<button
-					type='button'
-					className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
-				>
-					<p className='justify-end text-black text-base font-semibold font-barlow'>
-						Lock Target
-					</p>
-				</button>
-				<button
-					type='button'
-					onClick={addShot}
-					className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
-				>
-					<p className='justify-end text-black text-base font-semibold font-barlow'>
-						Mark Ball
-					</p>
-				</button>
-			</div>
+				</div>
+			)}
+			{!isPreviewMode && (
+				<div className='self-stretch inline-flex justify-start items-start gap-2'>
+					<button
+						type='button'
+						className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
+					>
+						<p className='justify-end text-black text-base font-semibold font-barlow'>
+							Scorecard
+						</p>
+					</button>
+					<button
+						type='button'
+						className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
+					>
+						<p className='justify-end text-black text-base font-semibold font-barlow'>
+							Lock Target
+						</p>
+					</button>
+					<button
+						type='button'
+						onClick={addShot}
+						className='flex-1 self-stretch py-2.5 bg-glass rounded-md drop-shadows border-glass inline-flex flex-col justify-center items-center'
+					>
+						<p className='justify-end text-black text-base font-semibold font-barlow'>
+							Mark Ball
+						</p>
+					</button>
+				</div>
+			)}
 			<div className='self-stretch p-4 bg-glass rounded-md border-glass inline-flex justify-start items-center gap-6 overflow-hidden'>
 				<button
 					type='button'

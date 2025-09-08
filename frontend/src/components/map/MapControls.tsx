@@ -8,9 +8,11 @@ import type { LatLng } from '../../util/geoUtils';
 export default function MapControls({
 	setUserCoords,
 	userCoords,
+	isPreviewMode = false,
 }: {
 	setUserCoords: (position: LatLng) => void;
 	userCoords: LatLng | null;
+	isPreviewMode?: boolean;
 }) {
 	const map = useMap();
 	const [isTracking, setIsTracking] = useState(false);
@@ -82,10 +84,12 @@ export default function MapControls({
 	return (
 		<div className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center5'>
 			<div className='w-10 bg-glass rounded-lg border-glass flex flex-col justify-center items-center gap-px overflow-hidden'>
-				<ControlButton
-					icon={<LocationIcon className='text-black' />}
-					onClick={toggleTracking}
-				/>
+				{!isPreviewMode && (
+					<ControlButton
+						icon={<LocationIcon className='text-black' />}
+						onClick={toggleTracking}
+					/>
+				)}
 				<ControlButton
 					icon={<PlusIcon className='text-black' />}
 					onClick={zoomIn}

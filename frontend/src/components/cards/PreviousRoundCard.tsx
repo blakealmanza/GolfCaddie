@@ -31,7 +31,7 @@ export default function PreviousRoundCard({
 
 	return (
 		<Link
-			to={`/`}
+			to={`/round/${roundData.roundId}`}
 			className='h-20 w-full rounded-lg border-glass flex overflow-hidden'
 		>
 			<img src={imageUrl} alt={imageAlt} className='w-20 h-full object-cover' />
