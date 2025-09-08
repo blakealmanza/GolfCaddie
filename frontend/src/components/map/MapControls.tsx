@@ -19,9 +19,6 @@ export default function MapControls({
 	useEffect(() => {
 		if (!map) return;
 
-		console.log('MapControls useEffect running, isTracking:', isTracking);
-		console.log('Geolocation available:', !!navigator.geolocation);
-
 		// Start tracking automatically when map loads
 		if (!isTracking && navigator.geolocation) {
 			const id = navigator.geolocation.watchPosition(
@@ -30,7 +27,6 @@ export default function MapControls({
 						lat: pos.coords.latitude,
 						lng: pos.coords.longitude,
 					};
-					console.log('Location update:', coords);
 					setUserCoords(coords);
 					// Don't automatically pan the map - let the center prop handle it
 				},
