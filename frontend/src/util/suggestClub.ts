@@ -1,12 +1,15 @@
 const clubSuggestions = [
-	{ club: 'Lob Wedge', max: 60 },
-	{ club: 'Sand Wedge', max: 90 },
-	{ club: 'Pitching Wedge', max: 110 },
-	{ club: '9 Iron', max: 130 },
-	{ club: '7 Iron', max: 160 },
-	{ club: '5 Iron', max: 200 },
-	{ club: '3 Wood', max: 230 },
-	{ club: 'Driver', max: 250 },
+	{ club: 'LW', max: 75 },
+	{ club: 'SW', max: 90 },
+	{ club: 'PW', max: 105 },
+	{ club: '9i', max: 120 },
+	{ club: '8i', max: 135 },
+	{ club: '7i', max: 150 },
+	{ club: '6i', max: 165 },
+	{ club: '5i', max: 180 },
+	{ club: '4i', max: 200 },
+	{ club: '3W', max: 220 },
+	{ club: 'D', max: 250 },
 ];
 
 export function suggestClub(distanceYards: number): string {

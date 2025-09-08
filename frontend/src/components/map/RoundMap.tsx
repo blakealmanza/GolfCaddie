@@ -14,8 +14,19 @@ import { suggestClub } from '../../util/suggestClub';
 import { Polyline } from './geometry';
 import MapControls from './MapControls';
 
-function getMapCenter(tee: LatLng | null, pin: LatLng | null): LatLng {
-	if (!tee || !pin) return { lat: 40, lng: -120 };
+function getMapCenter(
+	tee: LatLng | null,
+	pin: LatLng | null,
+	userCoords: LatLng | null,
+): LatLng {
+	if (!tee || !pin) {
+		// If no tee/pin coordinates, use user's current location if available
+		if (userCoords) {
+			return userCoords;
+		}
+		// Fallback to a default location if no user coordinates
+		return { lat: 40, lng: -120 };
+	}
 
 	return {
 		lat: tee.lat * 0.7 + pin.lat * 0.3,
@@ -71,8 +82,16 @@ export default function RoundMap() {
 	const pinCoords = selectedHole.pin;
 	const shots: Shot[] = selectedHole.shots || [];
 
-	const mapCenter = getMapCenter(teeCoords, pinCoords);
+	const mapCenter = getMapCenter(teeCoords, pinCoords, mapState.userCoords);
 	const mapHeading = getMapHeading(teeCoords, pinCoords);
+
+	// Update map center when user coordinates change (for newly created courses)
+	useEffect(() => {
+		if (mapState.userCoords && !teeCoords && !pinCoords) {
+			// For newly created courses, the map center will be updated via the center prop
+			// This effect ensures the map re-renders with the new center
+		}
+	}, [mapState.userCoords, teeCoords, pinCoords]);
 
 	useEffect(() => {
 		if (mapState.target && mapState.userCoords && teeCoords) {
@@ -183,9 +202,11 @@ export default function RoundMap() {
 			});
 		}
 		if (mapState.target && pinCoords) {
+			const targetToPinDistance = getDistance(mapState.target, pinCoords);
+			const suggestedClub = suggestClub(targetToPinDistance);
 			lineMidpoints.push({
 				position: getMidpoint(mapState.target, pinCoords),
-				label: `${getDistance(mapState.target, pinCoords)} - 8i`,
+				label: `${targetToPinDistance} - ${suggestedClub}`,
 			});
 		}
 	}
@@ -203,6 +224,8 @@ export default function RoundMap() {
 					onClick={handleClick}
 					mapTypeId='satellite'
 					mapId={import.meta.env.VITE_GOOGLE_MAP_ID}
+					scrollwheel={true}
+					disableDoubleClickZoom={false}
 				>
 					{teeCoords && (
 						<AdvancedMarker position={teeCoords}>
@@ -273,7 +296,6 @@ export default function RoundMap() {
 					{controlsPortal &&
 						createPortal(
 							<MapControls
-								userCoords={mapState.userCoords}
 								setUserCoords={(coords) =>
 									mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
 								}
