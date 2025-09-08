@@ -1,9 +1,10 @@
 import type { Course, Round } from '@shared/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import HorizontalCard from '@/components/cards/HorizontalCard';
 import VerticalCard from '@/components/cards/VerticalCard';
 import Header from '@/components/Header';
+import CourseCreatorModal from '@/components/modals/CourseCreatorModal';
 import Section from '@/components/Section';
 import ColoredButton from '@/components/ui/ColoredButton';
 import { useCustomAuth } from '@/context/AuthContext';
@@ -12,6 +13,7 @@ import { fetchUserRounds } from '@/context/roundService';
 
 export default function CoursesPage() {
 	const { idToken } = useCustomAuth();
+	const [showCourseCreator, setShowCourseCreator] = useState(false);
 
 	const queryClient = useQueryClient();
 
@@ -19,7 +21,10 @@ export default function CoursesPage() {
 		Course[]
 	>({
 		queryKey: ['courses'],
-		queryFn: () => listCourses(idToken!),
+		queryFn: () => {
+			if (!idToken) throw new Error('No authentication token');
+			return listCourses(idToken);
+		},
 		enabled: typeof idToken === 'string' && idToken.length > 0,
 		staleTime: 5 * 60 * 1000,
 	});
@@ -27,7 +32,10 @@ export default function CoursesPage() {
 	const { data: recentRounds = [], isLoading: isLoadingRecentRounds } =
 		useQuery<Round[]>({
 			queryKey: ['rounds'],
-			queryFn: () => fetchUserRounds(idToken!),
+			queryFn: () => {
+				if (!idToken) throw new Error('No authentication token');
+				return fetchUserRounds(idToken);
+			},
 			enabled: !!idToken,
 			staleTime: 5 * 60 * 1000,
 		});
@@ -67,13 +75,21 @@ export default function CoursesPage() {
 							<VerticalCard key={round.courseId} roundData={round} />
 						))}
 			</Section>
-			<ColoredButton text='Create New Course' onClick={() => {}} />
+			<ColoredButton
+				text='Create New Course'
+				onClick={() => setShowCourseCreator(true)}
+			/>
 			<Section title='All Courses'>
 				{!isLoadingAllCourses &&
 					allCourses.map((course) => (
 						<HorizontalCard key={course.courseId} courseData={course} />
 					))}
 			</Section>
+
+			<CourseCreatorModal
+				isOpen={showCourseCreator}
+				onClose={() => setShowCourseCreator(false)}
+			/>
 		</>
 	);
 }

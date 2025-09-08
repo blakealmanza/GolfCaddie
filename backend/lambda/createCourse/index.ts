@@ -19,9 +19,14 @@ export async function handler(event: APIGatewayProxyEvent) {
 		const item: Course = {
 			courseId,
 			name: body.name,
+			location: body.location || '',
 			holes: body.holes || [],
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
+			images: body.images || {
+				thumbnail: { img: 'default-thumbnail.jpg', alt: body.name },
+				gallery: [],
+			},
 		};
 
 		try {

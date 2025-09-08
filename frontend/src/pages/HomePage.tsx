@@ -1,6 +1,7 @@
 import type { Round } from '@shared/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import InProgressCard from '@/components/cards/InProgressCard';
 import PreviousRoundCard from '@/components/cards/PreviousRoundCard';
 import Header from '@/components/Header';
@@ -11,6 +12,7 @@ import { fetchUserRounds } from '@/context/roundService';
 
 export default function HomePage() {
 	const { idToken } = useCustomAuth();
+	const navigate = useNavigate();
 
 	const queryClient = useQueryClient();
 
@@ -40,6 +42,23 @@ export default function HomePage() {
 	);
 	const finishedRounds = rounds.filter((round) => round.state === 'finished');
 
+	const handleStartNewRound = () => {
+		navigate('/courses');
+	};
+
+	// Get the most recently played course for quick start option
+	const getLastPlayedCourse = () => {
+		if (finishedRounds.length === 0) return null;
+		// Sort by startedAt date and get the most recent
+		const sortedRounds = [...finishedRounds].sort(
+			(a, b) =>
+				new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+		);
+		return sortedRounds[0];
+	};
+
+	const lastPlayedRound = getLastPlayedCourse();
+
 	return (
 		<>
 			<Header title='Home' />
@@ -50,7 +69,20 @@ export default function HomePage() {
 					))}
 				</Section>
 			)}
-			<ColoredButton text='Start New Round' />
+			<div className='self-stretch flex flex-col gap-3'>
+				<ColoredButton text='Start New Round' onClick={handleStartNewRound} />
+				{lastPlayedRound && (
+					<button
+						type='button'
+						onClick={() => navigate(`/courses/${lastPlayedRound.courseId}`)}
+						className='self-stretch py-3 bg-glass rounded-lg drop-shadows border-glass inline-flex flex-col justify-center items-center overflow-hidden'
+					>
+						<p className='text-black text-base font-semibold font-barlow'>
+							Quick Start: {lastPlayedRound.courseName}
+						</p>
+					</button>
+				)}
+			</div>
 			<Section title='Previous Rounds'>
 				{!isLoading &&
 					finishedRounds.map((round) => (

@@ -31,7 +31,7 @@ export default function CoursePreviewPage() {
 	});
 
 	const courseName = course?.name || 'Unknown Course';
-	const courseLocation = course?.location || 'Unknown Location';
+	const courseLocation = course?.location || 'Location not set';
 	const courseHoles = course?.holes?.length || 18;
 	const coursePar =
 		course?.holes?.reduce((acc, hole) => acc + hole.par, 0) || 72;

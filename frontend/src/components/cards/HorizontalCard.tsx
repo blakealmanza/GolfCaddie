@@ -3,17 +3,18 @@ import { Link } from 'react-router-dom';
 
 export default function HorizontalCard({ courseData }: { courseData: Course }) {
 	const imageBaseURL = `${import.meta.env.VITE_S3_COURSES_BUCKET}/${courseData.courseId}`;
+	const imageUrl = courseData.images?.thumbnail?.img
+		? `${imageBaseURL}/${courseData.images.thumbnail.img}`
+		: '/placeholder-course.png';
+	const imageAlt =
+		courseData.images?.thumbnail?.alt || courseData.name || 'Course image';
 
 	return (
 		<Link
 			to={`/courses/${courseData.courseId}`}
 			className='self-stretch h-20 rounded-lg border-glass inline-flex justify-start items-start overflow-hidden shrink-0'
 		>
-			<img
-				src={`${imageBaseURL}/${courseData.images.thumbnail.img}`}
-				alt={`${imageBaseURL}/${courseData.images.thumbnail.alt}`}
-				className='w-20 h-full object-cover'
-			/>
+			<img src={imageUrl} alt={imageAlt} className='w-20 h-full object-cover' />
 			<div className='flex-1 h-full p-3 bg-glass flex justify-start items-start gap-3 overflow-hidden'>
 				<div className='flex-1 self-stretch inline-flex flex-col justify-between items-start'>
 					<div className='self-stretch flex flex-col justify-start items-start gap-3'>
@@ -21,7 +22,7 @@ export default function HorizontalCard({ courseData }: { courseData: Course }) {
 							{courseData.name}
 						</p>
 						<p className='self-stretch justify-end text-black text-xs font-semibold font-barlow'>
-							{courseData.location}
+							{courseData.location || 'Location not set'}
 						</p>
 					</div>
 					<div className='self-stretch inline-flex justify-end items-start gap-1.5'>
