@@ -65,6 +65,7 @@ export default function ExitRoundModal({
 						onClick={onClose}
 						className='w-full'
 						disabled={isEndingRound || isPausingRound}
+						textColor='black'
 					/>
 				</div>
 			</div>

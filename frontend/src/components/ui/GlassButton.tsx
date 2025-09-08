@@ -3,18 +3,22 @@ export default function GlassButton({
 	onClick,
 	loading = false,
 	disabled = false,
+	className,
 }: {
 	text: string;
 	onClick?: () => void;
 	loading?: boolean;
 	disabled?: boolean;
+	className?: string;
 }) {
+	const classes = `flex-1 px-2 py-3 bg-glass rounded-lg drop-shadows border-glass inline-flex flex-col justify-center items-center overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`;
+
 	return (
 		<button
 			type='button'
 			onClick={onClick}
 			disabled={disabled || loading}
-			className='flex-1 px-2 py-3 bg-glass rounded-lg drop-shadows border-glass inline-flex flex-col justify-center items-center overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed'
+			className={classes}
 		>
 			{loading ? (
 				<div className='flex items-center gap-2'>

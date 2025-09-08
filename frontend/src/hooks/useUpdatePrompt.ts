@@ -3,9 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 
 export function useUpdatePrompt() {
 	const [showPrompt, setShowPrompt] = useState(false);
+	const [isDismissed, setIsDismissed] = useState(false);
 	const firstCheck = useRef(true); // track initial mount
 
 	const { needRefresh, updateServiceWorker } = useRegisterSW();
+
+	// Don't show update prompt on localhost during development
+	const isLocalhost =
+		window.location.hostname === 'localhost' ||
+		window.location.hostname === '127.0.0.1';
 
 	useEffect(() => {
 		if (firstCheck.current) {
@@ -14,10 +20,11 @@ export function useUpdatePrompt() {
 			return;
 		}
 
-		if (needRefresh) {
+		// Don't show prompt on localhost or if already dismissed
+		if (needRefresh && !isLocalhost && !isDismissed) {
 			setShowPrompt(true);
 		}
-	}, [needRefresh]);
+	}, [needRefresh, isLocalhost, isDismissed]);
 
 	const reloadApp = () => {
 		if (!updateServiceWorker) return;
@@ -26,5 +33,17 @@ export function useUpdatePrompt() {
 		});
 	};
 
-	return { showPrompt, reloadApp };
+	const dismissPrompt = () => {
+		setShowPrompt(false);
+		setIsDismissed(true);
+		// Reset dismissed state after 5 minutes to allow future updates
+		setTimeout(
+			() => {
+				setIsDismissed(false);
+			},
+			5 * 60 * 1000,
+		);
+	};
+
+	return { showPrompt, reloadApp, dismissPrompt };
 }
