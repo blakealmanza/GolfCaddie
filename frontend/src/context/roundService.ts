@@ -1,4 +1,5 @@
 import type { Round, RoundHole } from '@shared/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -83,6 +84,50 @@ export async function endRound(
 	if (!response.ok) {
 		throw new Error(`Failed to end round ${roundId}: ${response.statusText}`);
 	}
+}
+
+export async function pauseRound(
+	roundId: string,
+	idToken: string,
+): Promise<void> {
+	const response = await fetch(`${API_BASE_URL}/rounds/${roundId}/pause`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${idToken}`,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to pause round ${roundId}: ${response.statusText}`);
+	}
+}
+
+// Mutation hooks for ending and pausing rounds
+export function useEndRound() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ roundId, idToken }: { roundId: string; idToken: string }) =>
+			endRound(roundId, idToken),
+		onSuccess: () => {
+			// Invalidate and refetch rounds list
+			queryClient.invalidateQueries({ queryKey: ['rounds'] });
+		},
+	});
+}
+
+export function usePauseRound() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ roundId, idToken }: { roundId: string; idToken: string }) =>
+			pauseRound(roundId, idToken),
+		onSuccess: () => {
+			// Invalidate and refetch rounds list
+			queryClient.invalidateQueries({ queryKey: ['rounds'] });
+		},
+	});
 }
 
 export async function fetchUserRounds(idToken: string): Promise<Round[]> {

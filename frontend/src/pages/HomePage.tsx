@@ -16,7 +16,10 @@ export default function HomePage() {
 
 	const { data: rounds = [], isLoading } = useQuery<Round[]>({
 		queryKey: ['rounds'],
-		queryFn: () => fetchUserRounds(idToken!),
+		queryFn: () => {
+			if (!idToken) throw new Error('No authentication token');
+			return fetchUserRounds(idToken);
+		},
 		enabled: !!idToken, // only run query if idToken exists
 		staleTime: 5 * 60 * 1000,
 	});
@@ -31,18 +34,26 @@ export default function HomePage() {
 
 	if (!idToken) return null;
 
+	// Filter rounds by state
+	const activeRounds = rounds.filter(
+		(round) => round.state === 'in_progress' || round.state === 'paused',
+	);
+	const finishedRounds = rounds.filter((round) => round.state === 'finished');
+
 	return (
 		<>
 			<Header title='Home' />
-			{rounds.length > 0 && (
+			{activeRounds.length > 0 && (
 				<Section title='Currently Playing'>
-					<InProgressCard roundData={rounds[0]} />
+					{activeRounds.map((round) => (
+						<InProgressCard key={round.roundId} roundData={round} />
+					))}
 				</Section>
 			)}
 			<ColoredButton text='Start New Round' />
 			<Section title='Previous Rounds'>
 				{!isLoading &&
-					rounds.map((round) => (
+					finishedRounds.map((round) => (
 						<PreviousRoundCard key={round.roundId} roundData={round} />
 					))}
 			</Section>

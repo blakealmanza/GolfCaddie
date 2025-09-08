@@ -30,7 +30,7 @@ export async function handler(event: APIGatewayProxyEvent) {
 			console.error('Error updating round in DynamoDB:', sendError);
 
 			return response(500, {
-				message: 'Failed to update round',
+				message: 'Failed to end round',
 				error:
 					sendError instanceof Error
 						? sendError.message
@@ -38,12 +38,12 @@ export async function handler(event: APIGatewayProxyEvent) {
 			});
 		}
 
-		return response(200, { message: 'Round finished' });
+		return response(200, { message: 'Round ended' });
 	} catch (error) {
-		console.error('Error finishing round:', error);
+		console.error('Error ending round:', error);
 
 		return response(500, {
-			message: 'Failed to finish round',
+			message: 'Failed to end round',
 			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}

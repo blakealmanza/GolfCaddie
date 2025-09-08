@@ -65,17 +65,23 @@ export default function HoleInfoPanel() {
 
 		const currentHole = holes[selectedHoleIndex];
 		if (currentHole && currentHole.shots.length > 0) {
-			const shotsTaken = currentHole.shots.length;
-			const par = currentHole.par;
-			const scoreToPar = shotsTaken - par;
+			// Only save score if this hole doesn't already have a saved score
+			const hasExistingScore =
+				currentHole.score !== null && currentHole.score !== undefined;
 
-			dispatch({
-				type: 'SAVE_HOLE_SCORE',
-				payload: {
-					holeIndex: selectedHoleIndex,
-					score: scoreToPar,
-				},
-			});
+			if (!hasExistingScore) {
+				const shotsTaken = currentHole.shots.length;
+				const par = currentHole.par;
+				const scoreToPar = shotsTaken - par;
+
+				dispatch({
+					type: 'SAVE_HOLE_SCORE',
+					payload: {
+						holeIndex: selectedHoleIndex,
+						score: scoreToPar,
+					},
+				});
+			}
 		}
 	};
 
@@ -90,18 +96,26 @@ export default function HoleInfoPanel() {
 				// Get the saved score for this hole
 				const holeScore = savedScores[selectedHoleIndex];
 
-				// Create hole data with score included
-				const holeDataWithScore = {
-					...selectedCourseHole,
-					score: holeScore,
-				};
+				// Only save to database if this hole doesn't already have a saved score
+				// This prevents overwriting previously saved hole data
+				const currentHole = holes[selectedHoleIndex];
+				const hasExistingScore =
+					currentHole.score !== null && currentHole.score !== undefined;
 
-				await updateHoleInRound(
-					roundId,
-					selectedHoleIndex,
-					holeDataWithScore,
-					idToken,
-				);
+				if (!hasExistingScore && holeScore !== null) {
+					// Create hole data with score included
+					const holeDataWithScore = {
+						...selectedCourseHole,
+						score: holeScore,
+					};
+
+					await updateHoleInRound(
+						roundId,
+						selectedHoleIndex,
+						holeDataWithScore,
+						idToken,
+					);
+				}
 			} catch (error) {
 				console.error('Failed to save hole:', error);
 			}

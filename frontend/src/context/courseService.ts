@@ -66,6 +66,7 @@ export function createPreviewRound(course: Course): Round {
 		courseName: course.name,
 		courseLocation: course.location,
 		startedAt: new Date().toISOString(),
+		state: 'in_progress',
 		holes: course.holes.map((hole) => ({
 			tee: hole.tee,
 			pin: hole.pin,

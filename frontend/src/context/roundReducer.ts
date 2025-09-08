@@ -65,12 +65,26 @@ export function roundReducer(
 			// Extract saved scores from holes data
 			const savedScores = initialRoundHoles.map((hole) => hole.score ?? null);
 
+			// Find the first unplayed hole (no shots or no saved score)
+			// For preview/review modes, always start at hole 1
+			let initialHoleIndex = 0;
+			if (!isPreviewMode && !isReviewMode) {
+				const firstUnplayedHoleIndex = initialRoundHoles.findIndex(
+					(hole) =>
+						hole.shots.length === 0 ||
+						hole.score === null ||
+						hole.score === undefined,
+				);
+				initialHoleIndex =
+					firstUnplayedHoleIndex >= 0 ? firstUnplayedHoleIndex : 0;
+			}
+
 			return {
 				...state,
 				roundId,
 				holes: initialRoundHoles,
-				currentHoleIndex: 0,
-				selectedHoleIndex: 0,
+				currentHoleIndex: initialHoleIndex,
+				selectedHoleIndex: initialHoleIndex,
 				isPreviewMode,
 				isReviewMode,
 				savedScores,

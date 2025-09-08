@@ -96,6 +96,18 @@ export class BackendStack extends cdk.Stack {
 			{ ROUNDS_TABLE: roundsTable.tableName },
 			[roundsTable],
 		);
+		const endRoundIntegration = makeLambda(
+			'EndRoundFunction',
+			'lambda/endRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
+		const pauseRoundIntegration = makeLambda(
+			'PauseRoundFunction',
+			'lambda/pauseRound',
+			{ ROUNDS_TABLE: roundsTable.tableName },
+			[roundsTable],
+		);
 		const getRoundIntegration = makeLambda(
 			'GetRoundFunction',
 			'lambda/getRound',
@@ -204,6 +216,19 @@ export class BackendStack extends cdk.Stack {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,
 		});
+
+		const roundEnd = roundById.addResource('end');
+		roundEnd.addMethod('POST', endRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
+		const roundPause = roundById.addResource('pause');
+		roundPause.addMethod('POST', pauseRoundIntegration, {
+			authorizationType: apigateway.AuthorizationType.COGNITO,
+			authorizer,
+		});
+
 		roundById.addMethod('GET', getRoundIntegration, {
 			authorizationType: apigateway.AuthorizationType.COGNITO,
 			authorizer,

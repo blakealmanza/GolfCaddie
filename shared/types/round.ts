@@ -16,7 +16,10 @@ export type RoundHole = {
 	pin: LatLng | null;
 	par: number;
 	shots: Shot[];
+	score?: number | null; // Score to par for this hole
 };
+
+export type RoundState = 'in_progress' | 'finished' | 'paused';
 
 export type Round = {
 	roundId: string;
@@ -26,5 +29,6 @@ export type Round = {
 	courseLocation: string;
 	startedAt: string;
 	endedAt?: string;
+	state: RoundState;
 	holes: RoundHole[];
 };

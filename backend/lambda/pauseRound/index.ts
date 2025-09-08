@@ -9,7 +9,6 @@ export async function handler(event: APIGatewayProxyEvent) {
 			return response(400, { message: 'Missing path parameters' });
 		}
 		const roundId = event.pathParameters.roundId;
-		const now = new Date().toISOString();
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
@@ -18,11 +17,10 @@ export async function handler(event: APIGatewayProxyEvent) {
 				new UpdateCommand({
 					TableName: process.env.ROUNDS_TABLE,
 					Key: { roundId },
-					UpdateExpression: 'SET #state = :state, endedAt = :endedAt',
+					UpdateExpression: 'SET #state = :state',
 					ExpressionAttributeNames: { '#state': 'state' },
 					ExpressionAttributeValues: {
-						':state': 'finished',
-						':endedAt': now,
+						':state': 'paused',
 					},
 				}),
 			);
@@ -30,7 +28,7 @@ export async function handler(event: APIGatewayProxyEvent) {
 			console.error('Error updating round in DynamoDB:', sendError);
 
 			return response(500, {
-				message: 'Failed to update round',
+				message: 'Failed to pause round',
 				error:
 					sendError instanceof Error
 						? sendError.message
@@ -38,12 +36,12 @@ export async function handler(event: APIGatewayProxyEvent) {
 			});
 		}
 
-		return response(200, { message: 'Round finished' });
+		return response(200, { message: 'Round paused' });
 	} catch (error) {
-		console.error('Error finishing round:', error);
+		console.error('Error pausing round:', error);
 
 		return response(500, {
-			message: 'Failed to finish round',
+			message: 'Failed to pause round',
 			error: error instanceof Error ? error.message : 'Unknown error occurred',
 		});
 	}

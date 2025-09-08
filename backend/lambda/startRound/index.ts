@@ -65,6 +65,7 @@ export async function handler(event: APIGatewayProxyEvent) {
 			courseId: courseId ?? null,
 			courseName,
 			courseLocation,
+			state: 'in_progress',
 			holes,
 		};
 
