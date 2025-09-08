@@ -1,5 +1,6 @@
 import type { Course } from '@shared/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BackArrow from '@/assets/back-arrow.svg?react';
 import Chip from '@/components/ui/Chip';
@@ -14,14 +15,18 @@ export default function CoursePreviewPage() {
 	const { id: courseId } = useParams();
 	const { idToken } = useCustomAuth();
 	const navigate = useNavigate();
+	const [isStartingRound, setIsStartingRound] = useState(false);
 
 	const queryClient = useQueryClient();
 
 	const { data: course } = useQuery<Course>({
 		queryKey: ['course', courseId],
-		queryFn: () => fetchCourseById(courseId!, idToken!),
+		queryFn: () => {
+			if (!courseId || !idToken) throw new Error('Missing courseId or idToken');
+			return fetchCourseById(courseId, idToken);
+		},
 		initialData: () => queryClient.getQueryData(['course', courseId]),
-		enabled: typeof idToken === 'string',
+		enabled: typeof idToken === 'string' && typeof courseId === 'string',
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -39,9 +44,18 @@ export default function CoursePreviewPage() {
 		course?.images?.thumbnail?.alt || 'Course background image';
 
 	const handleStartRound = async (courseId: string) => {
-		if (!idToken) return;
-		const round = await createRound(courseId, idToken);
-		navigate(`/round/${round.roundId}`);
+		if (!idToken || isStartingRound) return;
+
+		try {
+			setIsStartingRound(true);
+			const round = await createRound(courseId, idToken);
+			navigate(`/round/${round.roundId}`);
+		} catch (error) {
+			console.error('Failed to start round:', error);
+			// You might want to show an error message to the user here
+		} finally {
+			setIsStartingRound(false);
+		}
 	};
 
 	if (!courseId || !idToken) return null;
@@ -53,7 +67,7 @@ export default function CoursePreviewPage() {
 			<button
 				type='button'
 				onClick={() => navigate(-1)}
-				className='bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'
+				className='cursor-pointer bg-glass rounded-lg drop-shadows border-glass blur-glass inline-flex flex-col justify-center items-center'
 			>
 				<div className='w-10 h-10 p-0 bg-glass rounded-lg border-glass flex flex-col justify-center items-center overflow-hidden'>
 					<BackArrow className='text-black' />
@@ -73,10 +87,15 @@ export default function CoursePreviewPage() {
 					</div>
 				</div>
 				<div className='self-stretch inline-flex justify-start items-start gap-2.5'>
-					<GlassOutlineButton text='Preview' />
+					<GlassOutlineButton
+						text='Preview'
+						onClick={() => navigate(`/courses/${courseId}/preview`)}
+					/>
 					<GlassButton
 						text='Start'
 						onClick={() => handleStartRound(courseId)}
+						loading={isStartingRound}
+						disabled={isStartingRound}
 					/>
 				</div>
 			</div>
