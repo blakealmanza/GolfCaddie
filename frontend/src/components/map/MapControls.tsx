@@ -7,11 +7,9 @@ import type { LatLng } from '../../util/geoUtils';
 
 export default function MapControls({
 	setUserCoords,
-	userCoords,
 	isPreviewMode = false,
 }: {
 	setUserCoords: (position: LatLng) => void;
-	userCoords: LatLng | null;
 	isPreviewMode?: boolean;
 }) {
 	const map = useMap();
@@ -21,7 +19,29 @@ export default function MapControls({
 	useEffect(() => {
 		if (!map) return;
 
-		toggleTracking();
+		console.log('MapControls useEffect running, isTracking:', isTracking);
+		console.log('Geolocation available:', !!navigator.geolocation);
+
+		// Start tracking automatically when map loads
+		if (!isTracking && navigator.geolocation) {
+			const id = navigator.geolocation.watchPosition(
+				(pos) => {
+					const coords = {
+						lat: pos.coords.latitude,
+						lng: pos.coords.longitude,
+					};
+					console.log('Location update:', coords);
+					setUserCoords(coords);
+					// Don't automatically pan the map - let the center prop handle it
+				},
+				(err) => {
+					console.error('Geolocation error:', err);
+				},
+				{ enableHighAccuracy: true },
+			);
+			watchIdRef.current = id;
+			setIsTracking(true);
+		}
 
 		// Stop tracking on map drag
 		const dragListener = map.addListener('dragstart', () => {
@@ -38,12 +58,13 @@ export default function MapControls({
 				navigator.geolocation.clearWatch(watchIdRef.current);
 			}
 		};
-	}, [map]);
+	}, [map, setUserCoords]);
 
 	const toggleTracking = () => {
 		if (!map) return;
 
 		if (!isTracking) {
+			// Start tracking
 			const id = navigator.geolocation.watchPosition(
 				(pos) => {
 					const coords = {
@@ -51,8 +72,7 @@ export default function MapControls({
 						lng: pos.coords.longitude,
 					};
 					setUserCoords(coords);
-					map.panTo(coords);
-					map.setZoom(17);
+					// Don't automatically pan the map - let the center prop handle it
 				},
 				(err) => {
 					console.error('Geolocation error:', err);
@@ -61,9 +81,13 @@ export default function MapControls({
 			);
 			watchIdRef.current = id;
 			setIsTracking(true);
-		} else if (userCoords) {
-			map.panTo(userCoords);
-			map.setZoom(17);
+		} else {
+			// Stop tracking
+			if (watchIdRef.current !== null) {
+				navigator.geolocation.clearWatch(watchIdRef.current);
+				watchIdRef.current = null;
+			}
+			setIsTracking(false);
 		}
 	};
 

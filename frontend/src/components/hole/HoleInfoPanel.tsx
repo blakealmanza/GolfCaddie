@@ -167,6 +167,16 @@ export default function HoleInfoPanel() {
 					</p>
 				</div>
 			)}
+			{!isPreviewMode && !isReviewMode && mapState.selectingMode !== 'none' && (
+				<div className='self-stretch px-3 py-2 bg-blue-500/20 rounded-lg border border-blue-500/50 inline-flex justify-center items-center'>
+					<p className='text-blue-700 text-sm font-semibold font-barlow'>
+						{mapState.selectingMode === 'tee' && 'Click to set tee location'}
+						{mapState.selectingMode === 'pin' && 'Click to set pin location'}
+						{mapState.selectingMode === 'target' &&
+							'Click to set target location'}
+					</p>
+				</div>
+			)}
 			{!isPreviewMode && !isReviewMode && (
 				<div className='self-stretch inline-flex justify-start items-start gap-2'>
 					<button
