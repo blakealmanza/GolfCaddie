@@ -4,24 +4,102 @@ import { useCustomAuth } from '@/context/AuthContext';
 import { useMap } from '@/context/MapContext';
 import { updateHoleInRound } from '@/context/roundService';
 import { useRound } from '../../context/RoundContext';
+import { getDistance } from '../../util/geoUtils';
 import ScoreBox from '../ScoreBox';
 
 export default function HoleInfoPanel() {
 	const { state, dispatch } = useRound();
 	const { state: mapState, dispatch: mapDispatch } = useMap();
-	const { selectedHoleIndex, holes, roundId, isPreviewMode } = state;
+	const {
+		selectedHoleIndex,
+		holes,
+		roundId,
+		isPreviewMode,
+		isReviewMode,
+		savedScores,
+	} = state;
 	const { idToken } = useCustomAuth();
 
 	const selectedCourseHole = holes[selectedHoleIndex];
 
+	// Calculate dynamic yards from tee to pin
+	const calculateYards = () => {
+		if (selectedCourseHole.tee && selectedCourseHole.pin) {
+			return getDistance(selectedCourseHole.tee, selectedCourseHole.pin);
+		}
+		return 0;
+	};
+
+	// Calculate dynamic score using saved scores
+	const calculateScore = (): `+${number}` | `-${number}` | 'E' | 0 => {
+		// In preview mode, always show 0
+		if (isPreviewMode) return 0;
+
+		// Calculate cumulative score from saved scores
+		let totalScoreToPar = 0;
+		let hasAnySavedScores = false;
+
+		// Sum up saved scores for all holes up to current hole
+		for (let i = 0; i <= selectedHoleIndex; i++) {
+			const savedScore = savedScores[i];
+			if (savedScore !== null) {
+				totalScoreToPar += savedScore;
+				hasAnySavedScores = true;
+			}
+		}
+
+		// If no scores have been saved yet, show 0
+		if (!hasAnySavedScores) return 0;
+
+		if (totalScoreToPar === 0) return 'E';
+		if (totalScoreToPar > 0) return `+${totalScoreToPar}` as `+${number}`;
+		return `${totalScoreToPar}` as `-${number}`;
+	};
+
+	const yards = calculateYards();
+	const score = calculateScore();
+
+	// Calculate and save the score for the current hole
+	const saveCurrentHoleScore = () => {
+		if (isPreviewMode || isReviewMode) return;
+
+		const currentHole = holes[selectedHoleIndex];
+		if (currentHole && currentHole.shots.length > 0) {
+			const shotsTaken = currentHole.shots.length;
+			const par = currentHole.par;
+			const scoreToPar = shotsTaken - par;
+
+			dispatch({
+				type: 'SAVE_HOLE_SCORE',
+				payload: {
+					holeIndex: selectedHoleIndex,
+					score: scoreToPar,
+				},
+			});
+		}
+	};
+
 	const nextHole = async () => {
-		if (!isPreviewMode) {
+		// Save the current hole score before moving to next hole
+		saveCurrentHoleScore();
+
+		if (!isPreviewMode && !isReviewMode) {
 			try {
 				if (!idToken || !roundId) return;
+
+				// Get the saved score for this hole
+				const holeScore = savedScores[selectedHoleIndex];
+
+				// Create hole data with score included
+				const holeDataWithScore = {
+					...selectedCourseHole,
+					score: holeScore,
+				};
+
 				await updateHoleInRound(
 					roundId,
 					selectedHoleIndex,
-					selectedCourseHole,
+					holeDataWithScore,
 					idToken,
 				);
 			} catch (error) {
@@ -30,7 +108,7 @@ export default function HoleInfoPanel() {
 		}
 
 		dispatch({ type: 'NEXT_HOLE' });
-		if (!isPreviewMode) {
+		if (!isPreviewMode && !isReviewMode) {
 			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'tee' });
 		}
 	};
@@ -40,7 +118,7 @@ export default function HoleInfoPanel() {
 	};
 
 	const addShot = () => {
-		if (!mapState.userCoords) return;
+		if (!mapState.userCoords || isReviewMode) return;
 		dispatch({
 			type: 'ADD_SHOT',
 			payload: {
@@ -62,13 +140,20 @@ export default function HoleInfoPanel() {
 	return (
 		<div className='pointer-events-auto self-stretch p-2 bg-glass rounded-lg drop-shadows border-glass backdrop-blur-md inline-flex flex-col justify-center items-center gap-2 overflow-hidden'>
 			{isPreviewMode && (
-				<div className='self-stretch px-3 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30 inline-flex justify-center items-center'>
-					<p className='text-blue-600 text-sm font-semibold font-barlow'>
+				<div className='self-stretch px-3 py-2 bg-transparent rounded-lg border border-black inline-flex justify-center items-center'>
+					<p className='text-black text-sm font-semibold font-barlow'>
 						Preview Mode - View Only
 					</p>
 				</div>
 			)}
-			{!isPreviewMode && (
+			{isReviewMode && (
+				<div className='self-stretch px-3 py-2 bg-transparent rounded-lg border border-black inline-flex justify-center items-center'>
+					<p className='text-black text-sm font-semibold font-barlow'>
+						Review Mode - View Only
+					</p>
+				</div>
+			)}
+			{!isPreviewMode && !isReviewMode && (
 				<div className='self-stretch inline-flex justify-start items-start gap-2'>
 					<button
 						type='button'
@@ -113,7 +198,7 @@ export default function HoleInfoPanel() {
 						<div className='inline-flex justify-start items-start gap-4'>
 							<div className='flex justify-start items-end gap-1.5'>
 								<p className='justify-end text-black text-2xl font-semibold font-barlow leading-relaxed'>
-									321
+									{yards > 0 ? yards : '--'}
 								</p>
 								<p className='justify-end text-black text-base font-semibold font-barlow'>
 									yds
@@ -129,7 +214,7 @@ export default function HoleInfoPanel() {
 							</div>
 						</div>
 					</div>
-					<ScoreBox score='+12' />
+					<ScoreBox score={score} />
 				</div>
 				<button
 					type='button'

@@ -17,8 +17,12 @@ export default function PreviousRoundCard({
 
 	const { data: courseData } = useQuery<Course>({
 		queryKey: ['course', roundData.courseId],
-		queryFn: () => fetchCourseById(roundData.courseId, idToken!),
+		queryFn: () => {
+			if (!idToken) throw new Error('No authentication token');
+			return fetchCourseById(roundData.courseId, idToken);
+		},
 		initialData: () => queryClient.getQueryData(['course', roundData.courseId]),
+		enabled: !!idToken,
 	});
 
 	const imageUrl = courseData?.images?.thumbnail?.img
@@ -31,7 +35,7 @@ export default function PreviousRoundCard({
 
 	return (
 		<Link
-			to={`/round/${roundData.roundId}`}
+			to={`/round/${roundData.roundId}/review`}
 			className='h-20 w-full rounded-lg border-glass flex overflow-hidden'
 		>
 			<img src={imageUrl} alt={imageAlt} className='w-20 h-full object-cover' />
@@ -54,10 +58,20 @@ export default function PreviousRoundCard({
 					</p>
 				</div>
 				<ScoreBox
-					score={roundData.holes.reduce(
-						(acc, hole) => acc + hole.shots.length,
-						0,
-					)}
+					score={(() => {
+						// Calculate total score to par from saved scores
+						const totalScoreToPar = roundData.holes.reduce((acc, hole) => {
+							if (hole.score !== null && hole.score !== undefined) {
+								return acc + hole.score;
+							}
+							return acc;
+						}, 0);
+
+						if (totalScoreToPar === 0) return 'E';
+						if (totalScoreToPar > 0)
+							return `+${totalScoreToPar}` as `+${number}`;
+						return `${totalScoreToPar}` as `-${number}`;
+					})()}
 				/>
 			</div>
 		</Link>

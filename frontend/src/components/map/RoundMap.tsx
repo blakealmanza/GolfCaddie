@@ -40,7 +40,13 @@ function getMapHeading(
 
 export default function RoundMap() {
 	const { state, dispatch } = useRound();
-	const { holes, currentHoleIndex, selectedHoleIndex, isPreviewMode } = state;
+	const {
+		holes,
+		currentHoleIndex,
+		selectedHoleIndex,
+		isPreviewMode,
+		isReviewMode,
+	} = state;
 	const controlsPortal = document.getElementById('map-controls-portal');
 
 	const { state: mapState, dispatch: mapDispatch } = useMap();
@@ -48,12 +54,18 @@ export default function RoundMap() {
 	const selectedHole = holes[selectedHoleIndex] || ({} as Partial<RoundHole>);
 
 	useEffect(() => {
-		if (isPreviewMode) {
+		if (isPreviewMode || isReviewMode) {
 			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'none' });
 		} else if (selectedHole.tee && selectedHole.pin) {
 			mapDispatch({ type: 'SET_SELECTING_MODE', payload: 'target' });
 		}
-	}, [selectedHole.tee, selectedHole.pin, isPreviewMode, mapDispatch]);
+	}, [
+		selectedHole.tee,
+		selectedHole.pin,
+		isPreviewMode,
+		isReviewMode,
+		mapDispatch,
+	]);
 
 	const teeCoords = selectedHole.tee;
 	const pinCoords = selectedHole.pin;
@@ -84,8 +96,8 @@ export default function RoundMap() {
 	}, [selectedHoleIndex]);
 
 	const handleClick = (e: MapMouseEvent) => {
-		// Disable all interactions in preview mode
-		if (isPreviewMode) return;
+		// Disable all interactions in preview mode or review mode
+		if (isPreviewMode || isReviewMode) return;
 
 		if (!e.detail.latLng || selectedHoleIndex !== currentHoleIndex) return;
 
@@ -108,10 +120,11 @@ export default function RoundMap() {
 	const lineCoords: LatLng[] = [
 		...(teeCoords ? [teeCoords] : []),
 		...shots.map((s) => s.position),
-		// Only show target lines in non-preview mode
+		// Only show target lines in non-preview mode and non-review mode
 		...(selectedHoleIndex === currentHoleIndex &&
 		mapState.target &&
-		!isPreviewMode
+		!isPreviewMode &&
+		!isReviewMode
 			? [mapState.target]
 			: []),
 		...(pinCoords ? [pinCoords] : []),
@@ -161,8 +174,8 @@ export default function RoundMap() {
 	});
 
 	const lineMidpoints: { position: LatLng; label: string }[] = [];
-	// Only show distance/club suggestions in non-preview mode
-	if (!isPreviewMode) {
+	// Only show distance/club suggestions in non-preview mode and non-review mode
+	if (!isPreviewMode && !isReviewMode) {
 		if (teeCoords && mapState.target && mapState.suggestion) {
 			lineMidpoints.push({
 				position: getMidpoint(teeCoords, mapState.target),
@@ -229,7 +242,8 @@ export default function RoundMap() {
 					)}
 					{selectedHoleIndex === currentHoleIndex &&
 						mapState.target &&
-						!isPreviewMode && (
+						!isPreviewMode &&
+						!isReviewMode && (
 							<AdvancedMarker position={mapState.target}>
 								<div style={targetMarkerStyle}>
 									<div style={outerRing} />
@@ -263,7 +277,7 @@ export default function RoundMap() {
 								setUserCoords={(coords) =>
 									mapDispatch({ type: 'SET_USER_COORDS', payload: coords })
 								}
-								isPreviewMode={isPreviewMode}
+								isPreviewMode={isPreviewMode || isReviewMode}
 							/>,
 							controlsPortal,
 						)}

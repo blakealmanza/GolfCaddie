@@ -8,6 +8,8 @@ export interface RoundState {
 	currentHoleIndex: number;
 	selectedHoleIndex: number;
 	isPreviewMode: boolean;
+	isReviewMode: boolean;
+	savedScores: (number | null)[];
 }
 
 export type RoundAction =
@@ -21,11 +23,14 @@ export type RoundAction =
 	| { type: 'PREVIOUS_HOLE' }
 	| { type: 'SET_PAR'; payload: number }
 	| { type: 'SET_PREVIEW_MODE'; payload: boolean }
+	| { type: 'SET_REVIEW_MODE'; payload: boolean }
+	| { type: 'SAVE_HOLE_SCORE'; payload: { holeIndex: number; score: number } }
 	| {
 			type: 'INITIALIZE_ROUND';
 			payload: {
 				round: Round;
 				isPreviewMode?: boolean;
+				isReviewMode?: boolean;
 			};
 	  };
 
@@ -42,6 +47,8 @@ export const initialRoundState: RoundState = {
 	currentHoleIndex: 0,
 	selectedHoleIndex: 0,
 	isPreviewMode: false,
+	isReviewMode: false,
+	savedScores: [],
 };
 
 export function roundReducer(
@@ -53,6 +60,11 @@ export function roundReducer(
 			const initialRoundHoles = action.payload.round.holes;
 			const roundId = action.payload.round.roundId;
 			const isPreviewMode = action.payload.isPreviewMode ?? false;
+			const isReviewMode = action.payload.isReviewMode ?? false;
+
+			// Extract saved scores from holes data
+			const savedScores = initialRoundHoles.map((hole) => hole.score ?? null);
+
 			return {
 				...state,
 				roundId,
@@ -60,6 +72,8 @@ export function roundReducer(
 				currentHoleIndex: 0,
 				selectedHoleIndex: 0,
 				isPreviewMode,
+				isReviewMode,
+				savedScores,
 			};
 		}
 
@@ -67,6 +81,22 @@ export function roundReducer(
 			return {
 				...state,
 				isPreviewMode: action.payload,
+			};
+		}
+
+		case 'SET_REVIEW_MODE': {
+			return {
+				...state,
+				isReviewMode: action.payload,
+			};
+		}
+
+		case 'SAVE_HOLE_SCORE': {
+			const newSavedScores = [...state.savedScores];
+			newSavedScores[action.payload.holeIndex] = action.payload.score;
+			return {
+				...state,
+				savedScores: newSavedScores,
 			};
 		}
 

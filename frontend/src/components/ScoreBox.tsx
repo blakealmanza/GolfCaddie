@@ -1,4 +1,4 @@
-type Score = `+${number}` | `-${number}` | number;
+type Score = `+${number}` | `-${number}` | number | 'E' | 0;
 
 const COLORS = {
 	RED: {
@@ -16,6 +16,12 @@ const COLORS = {
 };
 
 function getColorByScore(score: Score): { bg: string; text: string } {
+	// Handle 'E' (even par) case
+	if (score === 'E') return COLORS.GREEN;
+
+	// Handle 0 case (no score yet)
+	if (score === 0) return COLORS.GREEN;
+
 	const parsed =
 		typeof score === 'string'
 			? parseInt(score.slice(1)) * (score.startsWith('-') ? -1 : 1)
