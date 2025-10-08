@@ -13,14 +13,16 @@ export default function SecondaryLayout({
 	background,
 }: SecondaryLayoutProps) {
 	return (
-		<main
-			className='min-h-screen w-screen px-6 py-12 inline-flex flex-col justify-between items-start overflow-hidden bg-cover bg-center'
-			style={
-				background ? { backgroundImage: `url(${background.src})` } : undefined
-			}
-		>
-			{background?.alt && <span className='sr-only'>{background.alt}</span>}
-			{children}
-		</main>
+		<div className='min-h-screen w-full flex justify-center'>
+			<main
+				className='w-full max-w-xl min-w-xs min-h-screen px-6 py-12 inline-flex flex-col justify-between items-start overflow-hidden bg-cover bg-center'
+				style={
+					background ? { backgroundImage: `url(${background.src})` } : undefined
+				}
+			>
+				{background?.alt && <span className='sr-only'>{background.alt}</span>}
+				{children}
+			</main>
+		</div>
 	);
 }
