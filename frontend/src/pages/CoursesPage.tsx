@@ -62,28 +62,70 @@ export default function CoursesPage() {
 		<>
 			<Header title='Courses' />
 			<Section title='Recently Played' isHorizontal={true}>
-				{!isLoadingRecentRounds &&
-					recentRounds
+				{isLoadingRecentRounds ? (
+					<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+						<p className='text-gray-600 text-sm font-medium font-barlow'>
+							Loading recent rounds...
+						</p>
+					</div>
+				) : (() => {
+					const uniqueRounds = recentRounds
 						.reduce<Round[]>((acc, round) => {
 							if (!acc.find((r) => r.courseId === round.courseId)) {
 								acc.push(round);
 							}
 							return acc;
 						}, [])
-						.slice(0, 5)
-						.map((round) => (
+						.slice(0, 5);
+
+					return uniqueRounds.length > 0 ? (
+						uniqueRounds.map((round) => (
 							<VerticalCard key={round.courseId} roundData={round} />
-						))}
+						))
+					) : (
+						<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+							<p className='text-gray-600 text-sm font-medium font-barlow mb-2'>
+								No recent rounds yet
+							</p>
+							<p className='text-gray-500 text-xs font-barlow'>
+								Play a round to see it here!
+							</p>
+						</div>
+					);
+				})()}
 			</Section>
 			<ColoredButton
 				text='Create New Course'
 				onClick={() => setShowCourseCreator(true)}
 			/>
 			<Section title='All Courses'>
-				{!isLoadingAllCourses &&
+				{isLoadingAllCourses ? (
+					<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+						<p className='text-gray-600 text-sm font-medium font-barlow'>
+							Loading courses...
+						</p>
+					</div>
+				) : allCourses.length > 0 ? (
 					allCourses.map((course) => (
 						<HorizontalCard key={course.courseId} courseData={course} />
-					))}
+					))
+				) : (
+					<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+						<p className='text-gray-600 text-sm font-medium font-barlow mb-2'>
+							No courses available yet
+						</p>
+						<p className='text-gray-500 text-xs font-barlow mb-4'>
+							Be the first to create a course!
+						</p>
+						<button
+							type='button'
+							onClick={() => setShowCourseCreator(true)}
+							className='px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold font-barlow hover:bg-blue-600 transition-colors'
+						>
+							Create Course
+						</button>
+					</div>
+				)}
 			</Section>
 
 			<CourseCreatorModal

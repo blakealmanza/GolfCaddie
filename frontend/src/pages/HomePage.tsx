@@ -84,10 +84,26 @@ export default function HomePage() {
 				)}
 			</div>
 			<Section title='Previous Rounds'>
-				{!isLoading &&
+				{isLoading ? (
+					<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+						<p className='text-gray-600 text-sm font-medium font-barlow'>
+							Loading your rounds...
+						</p>
+					</div>
+				) : finishedRounds.length > 0 ? (
 					finishedRounds.map((round) => (
 						<PreviousRoundCard key={round.roundId} roundData={round} />
-					))}
+					))
+				) : (
+					<div className='self-stretch px-4 py-8 bg-glass rounded-lg drop-shadows border-glass text-center'>
+						<p className='text-gray-600 text-sm font-medium font-barlow mb-2'>
+							No previous rounds yet
+						</p>
+						<p className='text-gray-500 text-xs font-barlow'>
+							Start your first round to see it here!
+						</p>
+					</div>
+				)}
 			</Section>
 		</>
 	);
