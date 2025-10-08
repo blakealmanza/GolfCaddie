@@ -3,14 +3,11 @@ import type { Round } from '@shared/types';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
+import { validateUserId } from '../shared/validation';
 
 export async function handler(event: APIGatewayProxyEvent) {
 	try {
-		const userId = event?.requestContext?.authorizer?.claims?.sub;
-
-		if (!userId) {
-			return response(401, { message: 'Unauthorized: Missing userId' });
-		}
+		const userId = validateUserId(event);
 
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 

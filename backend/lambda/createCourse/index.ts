@@ -4,27 +4,29 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamoClient } from '../shared/dynamoClient';
 import response from '../shared/response';
+import { validateRequestBody, validateUserId, validateCourseData, sanitizeString } from '../shared/validation';
 
 export async function handler(event: APIGatewayProxyEvent) {
 	try {
-		if (event.body === null) {
-			return response(400, { message: 'Missing body' });
-		}
-		const body = JSON.parse(event.body);
-		const userId = event.requestContext.authorizer?.claims?.sub;
-		const courseId = uuidv4();
+		const body = validateRequestBody(event);
+		const userId = validateUserId(event);
+		validateCourseData(body);
 
+		const courseId = uuidv4();
 		const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 		const item: Course = {
 			courseId,
-			name: body.name,
-			location: body.location || '',
+			name: sanitizeString(body.name, 100),
+			location: body.location ? sanitizeString(body.location, 200) : '',
 			holes: body.holes || [],
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			images: body.images || {
-				thumbnail: { img: 'default-thumbnail.jpg', alt: body.name },
+				thumbnail: {
+					img: 'default-thumbnail.jpg',
+					alt: sanitizeString(body.name, 100)
+				},
 				gallery: [],
 			},
 		};

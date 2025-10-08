@@ -40,18 +40,15 @@ export class BackendStack extends cdk.Stack {
 		});
 
 		// S3: Course data bucket
-		new s3.Bucket(this, 'CourseDataBucket', {
+		const courseDataBucket = new s3.Bucket(this, 'CourseDataBucket', {
 			bucketName: 'golf-caddie-courses',
-			blockPublicAccess: {
-				blockPublicAcls: false,
-				blockPublicPolicy: false,
-				ignorePublicAcls: false,
-				restrictPublicBuckets: false,
-			},
-			publicReadAccess: true,
+			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS_ONLY, // Allow public read
+			publicReadAccess: true, // Public read for images
 			removalPolicy: cdk.RemovalPolicy.RETAIN,
 			autoDeleteObjects: false,
-		});
+			encryption: s3.BucketEncryption.S3_MANAGED,
+			versioned: true,
+        });
 
 		// Helper to create Lambda and grant access
 		const makeLambda = (
@@ -65,10 +62,13 @@ export class BackendStack extends cdk.Stack {
 				handler: 'handler',
 				runtime: lambda.Runtime.NODEJS_20_X,
 				environment: env,
+				timeout: cdk.Duration.seconds(30),
+				memorySize: 256,
 				bundling: {
 					externalModules: [],
 					nodeModules: ['@aws-sdk/client-dynamodb', 'uuid'],
 				},
+				logRetention: cdk.aws_logs.RetentionDays.ONE_MONTH,
 			});
 			grants.forEach((t) => t.grantReadWriteData(fn));
 			return new apigateway.LambdaIntegration(fn);
@@ -159,11 +159,17 @@ export class BackendStack extends cdk.Stack {
 			restApiName: 'Golf Caddie Service',
 			deployOptions: {
 				stageName: 'prod',
+				throttlingBurstLimit: 100,
+				throttlingRateLimit: 50,
 			},
 			defaultCorsPreflightOptions: {
-				allowOrigins: apigateway.Cors.ALL_ORIGINS,
-				allowMethods: apigateway.Cors.ALL_METHODS,
-				allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+				allowOrigins: [
+					'https://golfcaddie.dev',
+					'http://localhost:5173',
+				],
+				allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+				allowHeaders: ['Content-Type', 'Authorization'],
+				maxAge: cdk.Duration.days(1),
 			},
 		});
 
