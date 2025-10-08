@@ -8,6 +8,7 @@ import MainLayout from './layouts/MainLayout.tsx';
 import CoursePreviewPage from './pages/CoursePreviewPage.tsx';
 import CoursesPage from './pages/CoursesPage.tsx';
 import HomePage from './pages/HomePage.tsx';
+import ProfilePage from './pages/ProfilePage.tsx';
 import RoundPage from './pages/RoundPage.tsx';
 import StatsPage from './pages/StatsPage.tsx';
 
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
 			{ path: '/', element: <HomePage /> },
 			{ path: '/courses', element: <CoursesPage /> },
 			{ path: '/stats', element: <StatsPage /> },
+			{ path: '/profile', element: <ProfilePage /> },
 		],
 	},
 	{ path: '/courses/:id', element: <CoursePreviewPage /> },
