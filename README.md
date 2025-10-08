@@ -1,37 +1,86 @@
-# GolfCaddie – Progressive Web App
+# GolfCaddie – GPS-Enabled Golf Caddie PWA
 
-**GolfCaddie** is a GPS-based progressive web app that acts as a virtual caddie, helping golfers:
-- Plan shots with visual target lines
-- Track shot-by-shot performance
-- Get smart club suggestions based on real-time location
+A modern Progressive Web App that transforms your phone into a virtual golf caddie, featuring real-time GPS tracking, smart club suggestions, and comprehensive round management.
 
-Built with a scalable AWS-powered backend for a seamless mobile-first experience.
+![GolfCaddie Banner](docs/banner.png)
 
----
+## Table of Contents
 
-## Tech Stack
+- [Problem Solved](#problem-solved)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Deployment](#deployment)
+- [Screenshots](#screenshots)
+  - [Design Process](#design-process)
+  - [Live Application](#live-application)
+  - [Branding & Assets](#branding--assets)
+
+## Problem Solved
+
+Golfers need accurate distance measurements, shot tracking, and course management tools. Traditional golf apps are often clunky, expensive, or lack real-time GPS capabilities. GolfCaddie provides a seamless, mobile-first experience.
+
+## Key Features
+
+- **Real-time GPS Tracking** - Accurate distance measurements and shot positioning
+- **Smart Club Suggestions** - AI-powered recommendations based on distance and conditions
+- **Comprehensive Round Tracking** - Shot-by-shot performance analysis
+- **Course Management** - Create, browse, and manage golf courses
+- **Progressive Web App** - Installable to home screen
+- **Round History** - Track performance over time with detailed statistics
+- **Modern UI/UX** - Clean, intuitive design optimized for mobile use
+
+## Architecture
 
 ### Frontend
-- React Router + TypeScript
-- Tailwind CSS
-- Vite PWA
+- **React 19 + TypeScript** for type-safe development
+- **Tailwind CSS** for responsive, mobile-first design
+- **Google Maps API** for GPS and mapping functionality
+- **TanStack Query** for efficient server state management
+- **Framer Motion** for smooth animations
+- **PWA** capabilities with service workers
 
-### Backend (AWS)
-- AWS Lambda (serverless functions)
-- Amazon S3 (course data & assets)
-- Amazon Cognito (authentication)
-- Amazon DynamoDB (user data & shot tracking)
+### Backend (AWS Serverless)
+- **AWS Lambda** - 12 serverless functions for different operations
+- **Amazon DynamoDB** - User data, rounds, and course information
+- **Amazon S3** - Course images and static assets
+- **Amazon Cognito** - Secure user authentication
+- **API Gateway** - RESTful API with rate limiting and CORS
 
-### DevOps
-- GitHub Actions (CI/CD)
-- Docker (deployment-ready containers)
+### DevOps & Infrastructure
+- **AWS CDK** - Infrastructure as Code
+- **Docker** - Containerized deployment
 
----
+## Deployment
 
-## Features
+The app is deployed on AWS with:
+- **Frontend** - S3 + CloudFront for global distribution
+- **Backend** - Lambda functions with API Gateway
+- **Database** - DynamoDB with proper indexing
+- **CDN** - CloudFront for optimal performance
 
--  Real-time GPS tracking
--  Shot history and round tracking
-- ️ Smart club recommendations
--  Course overlays and visual planning
--  Offline support with PWA installation
+## Screenshots
+
+### Design Process
+*Initial planning of pages, user flows, and types*
+![Planning & Research](docs/planning.png)
+
+*Design inspiration and visual direction*
+![Mood Boards](docs/mood-boards.png)
+
+*Mid Fidelity wireframes*
+![Mid Fidelity Designs](docs/mid-fidelity.png)
+
+*Final high fidelity UI designs*
+![High Fidelity Designs](docs/high-fidelity.png)
+
+### Live Application
+*Mobile interface*
+![Mobile Demos](docs/mobile-demos.png)
+
+*Tablet interface*
+![Tablet Demos](docs/tablet-demos.png)
+
+### Branding & Assets
+*Logo Variations*
+![Logos](docs/logos.png)
+
